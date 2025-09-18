@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Config/IDE
+.vscode/
+.idea/
+
+# Credenciais
+.env
+*.key
+*.pem
+
+# Dados e artefatos
+data/
+dados/
+outputs/
+logs/
+tmp/
+*.db
+*.sqlite
+parquet/
+csv/
+minio/
+*.csv
+
+# manter pastas vazias:
+!data/.gitkeep
+!outputs/.gitkeep
+!logs/.gitkeep
