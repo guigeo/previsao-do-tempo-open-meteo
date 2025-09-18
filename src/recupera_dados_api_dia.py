@@ -34,7 +34,7 @@ def get_clima_diario(lat, lon, tentativas=5, espera_inicial=5):
                   f"para coordenadas ({lat}, {lon}): {e}")
             if tentativa < tentativas:
                 espera = espera_inicial * tentativa
-                print(f"⏳ Aguardando {espera}s antes da nova tentativa...")
+                print(f"Aguardando {espera}s antes da nova tentativa...")
                 time.sleep(espera)
             else:
                 raise
