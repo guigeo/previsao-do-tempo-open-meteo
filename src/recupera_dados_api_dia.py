@@ -30,7 +30,7 @@ def get_clima_diario(lat, lon, tentativas=5, espera_inicial=5):
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
-            print(f"⚠️ Erro na tentativa {tentativa}/{tentativas} "
+            print(f"Erro na tentativa {tentativa}/{tentativas} "
                   f"para coordenadas ({lat}, {lon}): {e}")
             if tentativa < tentativas:
                 espera = espera_inicial * tentativa

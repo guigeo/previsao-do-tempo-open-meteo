@@ -6,7 +6,7 @@ import os
 def grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db"):
     """Lê um CSV e grava no SQLite (append)."""
     if not caminho_csv or not os.path.exists(caminho_csv):
-        print(f"⚠️ Arquivo CSV não encontrado: {caminho_csv}")
+        print(f"Arquivo CSV não encontrado: {caminho_csv}")
         return
 
     # Lê CSV
@@ -18,5 +18,5 @@ def grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db"):
     df.to_sql("clima_raw", conn, if_exists="append", index=False)
     conn.close()
 
-    print(f"✅ Dados do CSV {caminho_csv} gravados em {caminho_banco} (tabela clima_raw)")
+    print(f"Dados do CSV {caminho_csv} gravados em {caminho_banco} (tabela clima_raw)")
 #grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db")
