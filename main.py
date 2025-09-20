@@ -19,7 +19,7 @@ def main():
     path_ext_raw = "/home/gui_geo/projetos/previsao_tempo_open_meteo/data/raw/"
     dt_str = date.today().strftime("%Y%m%d")
 
-    print(f"📌 Buscando dados de HOJE ({dt_str}) para {len(df_cidades)} municípios")
+    print(f"Buscando dados de HOJE ({dt_str}) para {len(df_cidades)} municípios")
 
     # --- Loop nos municípios ---
     dados = []
@@ -29,7 +29,7 @@ def main():
             df_clima = processar_clima(clima, row)
             dados.append(df_clima)
         except Exception as e:
-            print(f"❌ Falha definitiva em {row['nome']} ({row['nome_uf']}): {e}")
+            print(f"Falha definitiva em {row['nome']} ({row['nome_uf']}): {e}")
 
     # --- Consolida ---
     if dados:
@@ -48,9 +48,13 @@ def main():
     arquivo_csv = (path_ext_raw + f"dados_climaticos_diarios_{dt_str}.csv")
     caminho_banco = "data/clima.db"
     
+    BASE_DIR = "/home/gui_geo/projetos/previsao_tempo_open_meteo"
+
+    caminho_banco = os.path.join(BASE_DIR, "data/clima.db")
+    caminho_bronze = os.path.join(BASE_DIR, "data/bronze/clima")
+
     grava_csv_sqlite(arquivo_csv, caminho_banco)
-
-    grava_csv_bronze(arquivo_csv, "data/bronze/clima")
-
+    grava_csv_bronze(arquivo_csv, caminho_bronze)
+    
 if __name__ == "__main__":
     main()

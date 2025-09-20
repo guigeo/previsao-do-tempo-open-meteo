@@ -2,7 +2,6 @@ import pandas as pd
 import sqlite3
 import os
 
-#caminho_csv = '/home/gui_geo/projetos/previsao_tempo_open_meteo/data/extracao_raw/dados_climaticos_diarios_20250918.csv'
 def grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db"):
     """Lê um CSV e grava no SQLite (append)."""
     if not caminho_csv or not os.path.exists(caminho_csv):
@@ -19,4 +18,3 @@ def grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db"):
     conn.close()
 
     print(f"Dados do CSV {caminho_csv} gravados em {caminho_banco} (tabela clima_raw)")
-#grava_csv_sqlite(caminho_csv, caminho_banco="data/clima.db")
