@@ -129,6 +129,74 @@ TIMEZONE = "America/Sao_Paulo"
 
 [Open-Meteo](https://open-meteo.com/) - API climática gratuita e open-source com dados históricos e previsões.
 
+**Última atualização**: Novembro de 2025
+## Backfill histórico
+
+O repositório inclui um script de backfill para popular o conjunto de dados históricos em Parquet e enviar para um bucket S3.
+
+- Script: `scripts/backfill_once.py`
+- Gera arquivos Parquet por dia em `data/raw/diario/` e `data/raw/horario/`.
+- Configurações principais (no topo do script): `DATA_INI`, `DATA_FIM`, `BUCKET`, `PROFILE`, `PARQUET_COMPRESSION`.
+- Compressão Parquet: `snappy` (padrão). Engine: `pyarrow`.
+
+Exemplo de execução:
+```bash
+python scripts/backfill_once.py
+```
+
+O script itera sobre a lista de municípios (`data/lista_municipios/lista_mun.csv`), faz chamadas ao endpoint `archive` da Open-Meteo para cada dia e município, salva os Parquets localmente e realiza upload para S3.
+
+## Upload para S3
+
+Existe um utilitário em `src/upload_s3.py` para enviar arquivos ao S3 usando `boto3` e um profile AWS configurado.
+
+- Função: `upload_para_s3(caminho_local, tipo, data_referencia, bucket, profile)`
+- Prefixo S3 (padrão Hive-style): `raw/clima/{tipo}/date=YYYY-MM-DD/{nome_arquivo}`
+- Bucket padrão usado no projeto: `gbrj-open-meteo-datalake` (pode ser alterado no call)
+
+Requisitos para upload:
+- Ter o `boto3` instalado (geralmente já disponível em ambientes que usam AWS SDKs)
+- Ter um profile AWS configurado no `~/.aws/credentials` com o nome passado no parâmetro `profile` (ex: `open-meteo`)
+
+Exemplo de uso (via script de backfill):
+```py
+from src.upload_s3 import upload_para_s3
+
+upload_para_s3(caminho_local='data/raw/diario/dados_climaticos_diarios_20251106.parquet',
+               tipo='diario',
+               data_referencia='2025-11-06',
+               bucket='gbrj-open-meteo-datalake',
+               profile='open-meteo')
+```
+
+## Atualizações na Estrutura do Projeto
+
+Adições relevantes:
+
+```
+previsao-do-tempo-open-meteo/
+├── main.py                          # Script principal com CLI
+├── requirements.txt                 # Dependências Python
+├── README.md                        # Este arquivo
+├── scripts/
+│   └── backfill_once.py            # Backfill histórico + upload S3
+├── src/
+│   ├── recupera_dados_api_dia.py   # Coleta dados diários
+│   ├── recupera_dados_api_hora.py  # Coleta dados horários
+│   ├── processa_dados.py           # Processamento e tradução
+│   └── upload_s3.py                # Utilitário de upload para S3 (boto3)
+└── data/
+    ├── lista_municipios/
+    │   └── lista_mun.csv           # Municípios com coordenadas
+    └── raw/                         # CSVs/Parquets coletados
+```
+
+## Observações importantes
+
+- O script de backfill pode gerar uma carga considerável de requisições à Open-Meteo — ajuste `SLEEP_BETWEEN_CALLS` e `RETRIES` conforme necessário.
+- Confira permissões e custo de armazenamento/transferência do bucket S3 antes de fazer uploads em massa.
+- Teste localmente com um subconjunto pequeno de municípios antes de rodar backfills grandes.
+
 ## 👤 Autor
 
 guigeo

@@ -14,6 +14,7 @@ import os
 from src.recupera_dados_api_dia import get_clima_diario
 from src.recupera_dados_api_hora import get_clima_horario
 from src.processa_dados import processar_clima
+from src.upload_s3 import upload_para_s3
 
 # ============================================================
 # CONFIG PADRÃO (pode mudar aqui)
@@ -194,6 +195,23 @@ def main():
             print(" •", p)
     else:
         print("\nNenhum arquivo gerado.")
+
+    if args.modo in ("diario", "ambos") and p1:
+        data_ref = _d1_date(TIMEZONE).strftime("%Y-%m-%d")
+        upload_para_s3(
+            caminho_local=p1,
+            tipo="diario",
+            data_referencia=data_ref
+        )
+
+    if args.modo in ("horario", "ambos") and p2:
+        data_ref = _d1_date(TIMEZONE).strftime("%Y-%m-%d")
+        upload_para_s3(
+            caminho_local=p2,
+            tipo="horario",
+            data_referencia=data_ref
+        )
+
 
 if __name__ == "__main__":
     main()

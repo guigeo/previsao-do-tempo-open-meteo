@@ -1,7 +1,7 @@
 # scripts/backfill_once.py
 from __future__ import annotations
 
-# --- garantir que 'src' seja importável sem mexer no main.py ---
+# --- garantir que 'src' seja importável ---
 from pathlib import Path
 import sys
 ROOT = Path(__file__).resolve().parents[1]  # raiz do projeto
@@ -14,22 +14,24 @@ from datetime import datetime, timedelta, date
 from dateutil.tz import gettz
 from tqdm import tqdm
 
-# usa sua padronização diária existente
+# funções do seu projeto
 from src.processa_dados import processar_clima
+from src.upload_s3 import upload_para_s3 
 
 # ======== CONFIG ONE-OFF ========
-DATA_INI = date(2025, 11, 1)
-DATA_FIM = date(2025, 11, 10)
+DATA_INI = date(2025, 11,1)
+DATA_FIM = date(2025, 11, 4)
 TIMEZONE = "America/Sao_Paulo"
 HTTP_TIMEOUT = 30
 RETRIES = 2
-SLEEP_BETWEEN_CALLS = 0.02  # folga leve entre chamadas
+SLEEP_BETWEEN_CALLS = 0.02
 PARQUET_COMPRESSION = "snappy"
 PARQUET_ENGINE = "pyarrow"
+BUCKET = "gbrj-open-meteo-datalake"
+PROFILE = "open-meteo"
 # ================================
 
 def base_dir() -> Path:
-    """Raiz do repo (onde existe pasta data/lista_municipios)."""
     here = ROOT
     if not (here / "data" / "lista_municipios").exists():
         here = Path(__file__).resolve().parents[2]
@@ -68,7 +70,6 @@ def fetch_daily_archive(lat: float, lon: float, dia: date, tz: str) -> pd.DataFr
     return pd.DataFrame(js.get("daily", {}))
 
 def fetch_hourly_archive(lat: float, lon: float, dia: date, tz: str) -> pd.DataFrame:
-    # Tenta archive direto
     params_a = {
         "latitude": lat,
         "longitude": lon,
@@ -84,7 +85,7 @@ def fetch_hourly_archive(lat: float, lon: float, dia: date, tz: str) -> pd.DataF
         if js.get("hourly"):
             return pd.DataFrame(js["hourly"])
 
-    # Fallback: forecast + filtro por data (raramente necessário pro histórico)
+    # fallback raro
     params_f = {
         "latitude": lat,
         "longitude": lon,
@@ -103,9 +104,7 @@ def fetch_hourly_archive(lat: float, lon: float, dia: date, tz: str) -> pd.DataF
 
 def save_parquet(df: pd.DataFrame, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
-    # garante tipos básicos strings para evitar surpresa com pyarrow ao concatenar depois
     for col in df.columns:
-        # Evita problemas com objetos mistos
         if df[col].dtype == "object":
             df[col] = df[col].astype("string")
     df.to_parquet(path, index=False, engine=PARQUET_ENGINE, compression=PARQUET_COMPRESSION)
@@ -113,28 +112,31 @@ def save_parquet(df: pd.DataFrame, path: Path):
 def main():
     root = base_dir()
     path_lista = root / "data" / "lista_municipios" / "lista_mun.csv"
-    # --- pastas separadas dentro de raw ---
+
+    # pastas locais
     path_raw = root / "data" / "raw"
     path_raw_diario = path_raw / "diario"
     path_raw_horario = path_raw / "horario"
 
     df_cidades = load_cidades(path_lista)
-    print(f"📦 Backfill one-off {DATA_INI} → {DATA_FIM} | cidades={len(df_cidades)}")
+    print(f"📦 Backfill {DATA_INI} → {DATA_FIM} | cidades={len(df_cidades)}")
     print("BASE_DIR:", root)
 
     for dia in daterange(DATA_INI, DATA_FIM):
         dt_str = dia.strftime("%Y%m%d")
-        print(f"\n=== {dt_str} ===")
+        dt_iso = dia.strftime("%Y-%m-%d")
 
-        # ---------- Diário ----------
+        print(f"\n=== {dt_str} ({dt_iso}) ===")
+
+        # ------------------ DIÁRIO ------------------
         dados_d, falhas_d = [], 0
+
         for _, row in tqdm(df_cidades.iterrows(), total=df_cidades.shape[0], desc=f"DIARIO {dt_str}"):
             ok = False
             for attempt in range(RETRIES + 1):
                 try:
                     dfd = fetch_daily_archive(float(row["latitude"]), float(row["longitude"]), dia, TIMEZONE)
                     if dfd is not None and not dfd.empty:
-                        # reaproveita sua padronização diária
                         try:
                             payload = {"daily": dfd.to_dict(orient="list")}
                             dfdp = processar_clima(payload, row)
@@ -156,25 +158,35 @@ def main():
                         time.sleep(1)
             time.sleep(SLEEP_BETWEEN_CALLS)
 
+        out_d = None
         if dados_d:
             df_out_d = pd.concat(dados_d, ignore_index=True)
             out_d = path_raw_diario / f"dados_climaticos_diarios_{dt_str}.parquet"
             save_parquet(df_out_d, out_d)
             print(f"✅ Diário salvo (Parquet): {out_d}")
-            if falhas_d:
-                print(f"   Aviso: {falhas_d} município(s) falharam (DIÁRIO {dt_str})")
         else:
             print("⚠️ Diário vazio nesse dia.")
 
-        # ---------- Horário ----------
+        # ------------------ UPLOAD DIÁRIO ------------------
+        if out_d:
+            print("📤 Upload S3 (diario)...")
+            upload_para_s3(
+                caminho_local=out_d,
+                tipo="diario",
+                data_referencia=dt_iso,
+                bucket=BUCKET,
+                profile=PROFILE
+            )
+
+        # ------------------ HORÁRIO ------------------
         dados_h, falhas_h = [], 0
+
         for _, row in tqdm(df_cidades.iterrows(), total=df_cidades.shape[0], desc=f"HORARIO {dt_str}"):
             ok = False
             for attempt in range(RETRIES + 1):
                 try:
                     dfh = fetch_hourly_archive(float(row["latitude"]), float(row["longitude"]), dia, TIMEZONE)
                     if dfh is not None and not dfh.empty:
-                        # enriquecer + padronizar cabeçalho PT-BR e ordem
                         dfh["nome"] = row["nome"]
                         dfh["uf"] = row["nome_uf"]
                         dfh["latitude"] = row["latitude"]
@@ -193,8 +205,8 @@ def main():
                             "data_hora", "municipio", "uf", "latitude", "longitude",
                             "temperatura_c", "umidade_relativa", "precipitacao_mm", "velocidade_vento_ms",
                         ]
-                        dfh = dfh[[c for c in ordered if c in dfh.columns]]
 
+                        dfh = dfh[[c for c in ordered if c in dfh.columns]]
                         dados_h.append(dfh)
                     ok = True
                     break
@@ -206,17 +218,28 @@ def main():
                         time.sleep(1)
             time.sleep(SLEEP_BETWEEN_CALLS)
 
+        out_h = None
         if dados_h:
             df_out_h = pd.concat(dados_h, ignore_index=True)
             out_h = path_raw_horario / f"dados_climaticos_horarios_{dt_str}.parquet"
             save_parquet(df_out_h, out_h)
             print(f"✅ Horário salvo (Parquet): {out_h}")
-            if falhas_h:
-                print(f"   Aviso: {falhas_h} município(s) falharam (HORÁRIO {dt_str})")
         else:
             print("⚠️ Horário vazio nesse dia.")
 
-    print("\n🎉 Backfill one-off concluído.")
+        # ------------------ UPLOAD HORÁRIO ------------------
+        if out_h:
+            print("📤 Upload S3 (horario)...")
+            upload_para_s3(
+                caminho_local=out_h,
+                tipo="horario",  # <- pois sua pasta local é "horario"
+                data_referencia=dt_iso,
+                bucket=BUCKET,
+                profile=PROFILE
+            )
+
+    print("\n🎉 Backfill concluído com sucesso!\n")
+
 
 if __name__ == "__main__":
     main()
