@@ -19,8 +19,8 @@ from src.processa_dados import processar_clima
 from src.upload_s3 import upload_para_s3 
 
 # ======== CONFIG ONE-OFF ========
-DATA_INI = date(2025, 11,1)
-DATA_FIM = date(2025, 11, 4)
+DATA_INI = date(2025, 11,5)
+DATA_FIM = date(2025, 11,11)
 TIMEZONE = "America/Sao_Paulo"
 HTTP_TIMEOUT = 30
 RETRIES = 2

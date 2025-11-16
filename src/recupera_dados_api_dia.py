@@ -1,20 +1,17 @@
+# src/recupera_dados_api_dia.py
+
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.tz import gettz
 
 
-def get_clima_diario(lat, lon, tentativas=5, espera_inicial=5):
+def get_clima_diario_por_data(lat, lon, dia_str, tentativas=5, espera_inicial=5):
     """
-    Faz requisição à API do Open-Meteo para o D-1 (ontem),
-    com retries e backoff exponencial.
+    Coleta dados DIÁRIOS para uma data específica (YYYY-MM-DD).
+    Mantém retries com backoff exponencial.
     """
 
-    # Calcula o D-1 considerando timezone de São Paulo
-    tz = gettz("America/Sao_Paulo")
-    d1 = (datetime.now(tz) - timedelta(days=1)).date().strftime("%Y-%m-%d")
-
-    # API de histórico (archive)
     url = "https://archive-api.open-meteo.com/v1/archive"
 
     params = {
@@ -28,8 +25,8 @@ def get_clima_diario(lat, lon, tentativas=5, espera_inicial=5):
             "shortwave_radiation_sum,weathercode"
         ),
         "timezone": "America/Sao_Paulo",
-        "start_date": d1,
-        "end_date": d1,
+        "start_date": dia_str,
+        "end_date": dia_str,
     }
 
     for tentativa in range(1, tentativas + 1):
@@ -37,11 +34,13 @@ def get_clima_diario(lat, lon, tentativas=5, espera_inicial=5):
             resp = requests.get(url, params=params, timeout=60)
             resp.raise_for_status()
             return resp.json()
+
         except Exception as e:
             print(
                 f"Erro na tentativa {tentativa}/{tentativas} "
-                f"para coordenadas ({lat}, {lon}): {e}"
+                f"para {dia_str} ({lat}, {lon}): {e}"
             )
+
             if tentativa < tentativas:
                 espera = espera_inicial * tentativa
                 print(f"Aguardando {espera}s antes da nova tentativa...")
