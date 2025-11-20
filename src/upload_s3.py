@@ -32,8 +32,8 @@ def upload_para_s3(
     print(f"   Arquivo: {caminho_local}")
 
     # Sessão boto3 usando o profile configurado 
-    session = boto3.Session(profile_name=profile)
-    s3 = session.client("s3")
+    #session = boto3.Session(profile_name=profile)
+    s3 = boto3.client("s3")
 
     # Upload (sobrescreve automaticamente se já existir)
     s3.upload_file(str(caminho_local), bucket, prefix)
