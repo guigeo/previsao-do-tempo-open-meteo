@@ -17,7 +17,7 @@ venv/
 *.pem
 
 # Dados e artefatos
-state/
+state/last_run.txt
 data/
 dados/
 outputs/
