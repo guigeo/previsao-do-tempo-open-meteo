@@ -206,34 +206,66 @@ def main():
 
     print("📅 Datas a processar:", [str(d) for d in datas])
 
+    # ----------------------------
+    # NOVO: armazenar parquets antes do upload
+    # ----------------------------
+    arquivos_diarios_gerados = []
+    arquivos_horarios_gerados = []
+
+    # =======================================================
+    # PARTE 1 — COLETA (gera todos os parquets primeiro)
+    # =======================================================
     for dia in datas:
         print(f"\n==============================")
-        print(f"PROCESSANDO {dia}")
+        print(f"GERANDO PARQUETS PARA {dia}")
         print(f"==============================")
 
-        # --- DIÁRIO ---
+        # DIÁRIO
         if args.modo in ("diario", "ambos"):
             p1 = coleta_diaria(base_dir, dia)
             if p1:
-                upload_para_s3(
-                    caminho_local=p1,
-                    tipo="diario",
-                    data_referencia=dia.strftime("%Y-%m-%d")
-                )
+                arquivos_diarios_gerados.append((p1, dia))
 
-        # --- HORÁRIO ---
+        # HORÁRIO
         if args.modo in ("horario", "ambos"):
             p2 = coleta_horaria(base_dir, dia)
             if p2:
-                upload_para_s3(
-                    caminho_local=p2,
-                    tipo="horario",
-                    data_referencia=dia.strftime("%Y-%m-%d")
-                )
+                arquivos_horarios_gerados.append((p2, dia))
 
-        # Atualiza state
-        _salvar_last_run(base_dir, dia)
-        print(f"📌 STATE atualizado para {dia}")
+    # =======================================================
+    # PARTE 2 — UPLOAD (somente depois de gerar tudo)
+    # =======================================================
+    print("\n==============================")
+    print("INICIANDO UPLOAD PARA S3…")
+    print("==============================")
+
+    # Upload dos diários
+    for caminho, dia in arquivos_diarios_gerados:
+        print(f"⬆️  Enviando diário {dia} → {caminho.name}")
+        upload_para_s3(
+            caminho_local=caminho,
+            tipo="diario",
+            data_referencia=dia.strftime("%Y-%m-%d")
+        )
+
+    # Upload dos horários
+    for caminho, dia in arquivos_horarios_gerados:
+        print(f"⬆️  Enviando horário {dia} → {caminho.name}")
+        upload_para_s3(
+            caminho_local=caminho,
+            tipo="horario",
+            data_referencia=dia.strftime("%Y-%m-%d")
+        )
+
+    # =======================================================
+    # PARTE 3 — Atualiza o STATE
+    # =======================================================
+    ultimo_processado = max(datas)
+    _salvar_last_run(base_dir, ultimo_processado)
+
+    print(f"\n📌 STATE atualizado para {ultimo_processado}")
+    print("✅ Processo concluído com sucesso!")
+
 
 
 if __name__ == "__main__":

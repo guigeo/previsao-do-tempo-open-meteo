@@ -17,6 +17,7 @@ venv/
 *.pem
 
 # Dados e artefatos
+state/
 data/
 dados/
 outputs/
