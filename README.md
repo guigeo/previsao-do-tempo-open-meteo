@@ -22,6 +22,116 @@ Sistema Python que coleta dados meteorológicos históricos (D-1) de forma robus
 pip install -r requirements.txt
 ```
 
+## Passo a passo — executar localmente
+
+Siga estes passos para que outra pessoa consiga rodar o projeto localmente.
+
+1) Clone o repositório e entre na pasta do projeto
+
+```bash
+git clone <REPO_URL>
+cd previsao-do-tempo-open-meteo
+```
+
+2) Crie e ative um ambiente virtual (recomendado)
+
+macOS / Linux (zsh/bash):
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Windows (PowerShell):
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+3) Instale dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+4) (Opcional) Configure perfil AWS para upload S3
+
+O projeto usa `boto3` com um `profile` (padrão: `open-meteo`). Configure um perfil AWS localmente:
+
+```bash
+aws configure --profile open-meteo
+```
+
+Forneça `AWS Access Key ID`, `AWS Secret Access Key`, `region` e `output` conforme necessário.
+
+5) Verifique a lista de municípios
+
+Confirme que o arquivo `data/lista_municipios/lista_mun.csv` existe e contém as colunas `codigo_ibge`, `nome`, `nome_uf`, `latitude`, `longitude`. Para testes locais, reduza a lista para 1-3 municípios.
+
+6) Executar coleta diária/horária (modo padrão: ambos)
+
+```bash
+python main.py            # coleta modo 'ambos' (padrão)
+python main.py --modo diario
+python main.py --modo horario
+```
+
+Os arquivos gerados ficam em `data/raw/` com nomes padronizados (`dados_climaticos_diarios_YYYYMMDD.csv` / `dados_climaticos_horarios_YYYYMMDD.csv`).
+
+7) Executar backfill histórico (Parquet + upload S3)
+
+O script `scripts/backfill_once.py` faz fetch histórico (archive), salva Parquet e realiza upload para S3. Por padrão as datas estão definidas no topo do arquivo em `DATA_INI` e `DATA_FIM`.
+
+- Recomendo testar com um intervalo pequeno (1 dia) e uma lista reduzida de municípios primeiro.
+- Para rodar:
+
+```bash
+python scripts/backfill_once.py
+```
+
+Se desejar limitar a execução a poucos municípios, crie um CSV temporário em `data/lista_municipios/` e aponte o script para ele (ou edite localmente `path_lista` no script para testes).
+
+8) Executar upload manualmente
+
+Você também pode chamar diretamente o utilitário de upload:
+
+```py
+from src.upload_s3 import upload_para_s3
+
+upload_para_s3(caminho_local='data/raw/diario/dados_climaticos_diarios_20251106.parquet',
+               tipo='diario',
+               data_referencia='2025-11-06',
+               bucket='gbrj-open-meteo-datalake',
+               profile='open-meteo')
+```
+
+9) Executar via Docker
+
+O `Dockerfile` e `docker-compose.yml` permitem rodar o job dentro de um container. O `docker-compose.yml` usa `CMD` do `Dockerfile` (por padrão `python main.py --modo ambos`).
+
+Construir e rodar:
+
+```bash
+docker-compose build --no-cache
+docker-compose up --abort-on-container-exit
+```
+
+Para sobrescrever o comando do container (ex.: rodar apenas diário):
+
+```bash
+docker-compose run --rm openmeteo python main.py --modo diario
+```
+
+10) Verificação rápida
+
+- Verifique `data/raw/` para arquivos gerados.
+- Ao usar S3, confirme no console/AWS CLI que os objetos foram criados no prefixo `raw/clima/{tipo}/date=YYYY-MM-DD/`.
+
+11) Boas práticas
+
+- Teste com 1-3 municípios antes de rodar a coleta completa.
+- Ajuste `SLEEP_BETWEEN_CALLS` e `RETRIES` em `scripts/backfill_once.py` para reduzir taxa de requisições.
+- Use um profile AWS com permissões mínimas necessárias (s3:PutObject).
+
 ### Uso
 
 Coletar dados de **ambos os modos** (padrão):
