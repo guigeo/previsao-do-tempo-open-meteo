@@ -3,12 +3,12 @@ services:
     container_name: openmeteo_job
     build: .
     image: previsao-open-meteo:latest
+
     env_file:
       - .env
+
     volumes:
       - ./state:/app/state
       - ./data:/app/data
-    # Usa o CMD do Dockerfile: python main.py --modo ambos
-    # Se quiser sobrescrever, descomente a linha abaixo e ajuste:
-    # command: ["python", "main.py", "--modo", "diario"]
+
     restart: "no"

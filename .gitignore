@@ -1,36 +1,76 @@
-# Python
+#####################################
+# PYTHON
+#####################################
 __pycache__/
 *.py[cod]
 *.ipynb_checkpoints/
 .venv/
 venv/
+env/
 .pytest_cache/
 .mypy_cache/
+*.egg-info/
 
-# Config/IDE
+#####################################
+# IDE / EDITOR
+#####################################
 .vscode/
 .idea/
 
-# Credenciais
+#####################################
+# CONFIGURAÇÕES E CREDENCIAIS
+#####################################
 .env
+*.env.local
 *.key
 *.pem
+*.p12
+*.crt
 
-# Dados e artefatos
-state/last_run.txt
+# Arquivos de configuração sensíveis
+*.aws
+.aws/
+*.ini
+
+#####################################
+# DADOS, ARTEFATOS E ESTADO
+#####################################
+# estado do job
+state/
+!state/.gitkeep
+
+# diretórios de dados
 data/
 dados/
 outputs/
 logs/
 tmp/
-*.db
-*.sqlite
+minio/
 parquet/
 csv/
-minio/
-*.csv
 
-# manter pastas vazias:
+# manter pastas vazias
 !data/.gitkeep
 !outputs/.gitkeep
 !logs/.gitkeep
+
+# arquivos específicos
+*.db
+*.sqlite
+*.csv
+*.parquet
+
+#####################################
+# DOCKER
+#####################################
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# imagens geradas
+*.tar
+
+#####################################
+# SISTEMA / MISC
+#####################################
+.DS_Store
+Thumbs.db
