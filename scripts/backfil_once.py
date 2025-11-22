@@ -7,6 +7,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]  # raiz do projeto
 sys.path.append(str(ROOT))
 
+import os
 import time
 import requests
 import pandas as pd
@@ -27,8 +28,8 @@ RETRIES = 2
 SLEEP_BETWEEN_CALLS = 0.02
 PARQUET_COMPRESSION = "snappy"
 PARQUET_ENGINE = "pyarrow"
-BUCKET = "gbrj-open-meteo-datalake"
-PROFILE = "open-meteo"
+BUCKET = os.getenv("S3_BUCKET")
+
 # ================================
 
 def base_dir() -> Path:
@@ -174,8 +175,7 @@ def main():
                 caminho_local=out_d,
                 tipo="diario",
                 data_referencia=dt_iso,
-                bucket=BUCKET,
-                profile=PROFILE
+                bucket=BUCKET
             )
 
         # ------------------ HORÁRIO ------------------
@@ -234,8 +234,7 @@ def main():
                 caminho_local=out_h,
                 tipo="horario",  # <- pois sua pasta local é "horario"
                 data_referencia=dt_iso,
-                bucket=BUCKET,
-                profile=PROFILE
+                bucket=BUCKET     
             )
 
     print("\n🎉 Backfill concluído com sucesso!\n")
