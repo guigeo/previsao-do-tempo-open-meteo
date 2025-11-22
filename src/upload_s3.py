@@ -1,12 +1,15 @@
 import boto3
 from pathlib import Path
+import os
+
+BUCKET = os.getenv("S3_BUCKET")
 
 def upload_para_s3(
     caminho_local: str | Path,
     tipo: str,                # "diarios" ou "horarios"
     data_referencia: str,     # "YYYY-MM-DD"
-    bucket: str = "gbrj-open-meteo-datalake",
-    profile: str = "open-meteo"
+    bucket: str = BUCKET
+    #profile: str = "open-meteo"
 ):
     """
     Envia um arquivo Parquet para o S3 no prefixo:

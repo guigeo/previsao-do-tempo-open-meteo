@@ -7,7 +7,6 @@ from dateutil.tz import gettz
 import argparse
 import pandas as pd
 from tqdm import tqdm
-import time
 import os
 
 # --- Suas libs locais ---
