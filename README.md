@@ -1,39 +1,90 @@
 # Previsão do Tempo - Open-Meteo 🌤️
 
-Coleta automatizada de dados climáticos para municípios brasileiros usando a API [Open-Meteo](https://open-meteo.com/).
+**Arquitetura End-to-End:** Python/Docker → S3 → Databricks Lakehouse (Medalion)
 
-## 📌 Sobre
+Sistema completo para coleta automatizada de dados climáticos, processamento em pipeline e transformação em **Lakehouse** usando Databricks.
+
+## 📌 Arquitetura
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                       INGESTÃO (Python/Docker)                      │
+│  - Open-Meteo API (dados D-1)                                       │
+│  - Coleta diária/horária para todos os municípios BR                │
+│  - Salva CSV localmente ou Parquet em S3                            │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   AWS S3     │
+                    │ /raw/clima/  │ ← Dados brutos (Parquet)
+                    └──────────────┘
+                           │
+                           ▼
+         ┌─────────────────────────────────────────┐
+         │   DATABRICKS LAKEHOUSE (Medalion)       │
+         │  ┌────────────────────────────────────┐ │
+         │  │  Bronze: Raw data                  │ │
+         │  │  (cloud_files + SLT)               │ │
+         │  └────────────┬───────────────────────┘ │
+         │               │                         │
+         │  ┌────────────▼───────────────────────┐ │
+         │  │  Silver: Transformed & Clean       │ │
+         │  │  (dedupe, tipos, normalização)     │ │
+         │  └────────────┬───────────────────────┘ │
+         │               │                         │
+         │  ┌────────────▼───────────────────────┐ │
+         │  │  Gold: Metrics & Analytics         │ │
+         │  │  (agregações, KPIs)                │ │
+         │  └────────────────────────────────────┘ │
+         └─────────────────────────────────────────┘
+```
+
+## 📋 Sobre o Projeto
 
 Sistema Python que coleta dados meteorológicos históricos (D-1) de forma robusta e eficiente, com suporte a:
 - **Dados Diários**: Temperatura máx/mín, sensação térmica, precipitação, neve, vento, radiação solar
 - **Dados Horários**: Temperatura, umidade relativa, precipitação, velocidade do vento
-- **Multi-município**: Processa simultaneamente todos os municípios da lista
+- **Multi-município**: Processa simultaneamente todos os municípios brasileiros
 - **Retry automático**: Tratamento inteligente de falhas de conexão
+- **Upload S3**: Salva dados em Parquet com particionamento Hive-style
+- **Databricks DLT**: Pipelines de transformação automatizados (Bronze → Silver → Gold)
 
 ## 🚀 Quick Start
 
-### Pré-requisitos
-- Python 3.8+
-- pip
+### ⚠️ IMPORTANTE: Configuração de Credenciais
 
-### Instalação
+**NÃO commite o arquivo `.env` com credenciais reais!**
+
+Este projeto usa `.env` para armazenar credenciais AWS. Para segurança:
+
+1. Copie `.env.example` para `.env` (local, não versionado)
+2. Preencha com suas credenciais reais
+3. `.gitignore` garante que `.env` nunca será commitado
 
 ```bash
-pip install -r requirements.txt
+cp .env.example .env
+# Edite .env com suas credenciais reais
 ```
 
-## Passo a passo — executar localmente
+### Pré-requisitos
 
-Siga estes passos para que outra pessoa consiga rodar o projeto localmente.
+- **Python 3.8+**
+- **pip** ou **conda**
+- **Docker** (para rodar containerizado)
+- **AWS Credentials** (para upload S3)
+- **Databricks Account** (para pipeline de transformação)
 
-1) Clone o repositório e entre na pasta do projeto
+### Instalação Local
+
+#### 1. Clone o repositório
 
 ```bash
-git clone <REPO_URL>
+git clone https://github.com/guigeo/previsao-do-tempo-open-meteo.git
 cd previsao-do-tempo-open-meteo
 ```
 
-2) Crie e ative um ambiente virtual (recomendado)
+#### 2. Crie e ative um ambiente virtual
 
 macOS / Linux (zsh/bash):
 ```bash
@@ -47,113 +98,125 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-3) Instale dependências
+#### 3. Instale dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4) (Opcional) Configure perfil AWS para upload S3
-
-O projeto usa `boto3` com um `profile` (padrão: `open-meteo`). Configure um perfil AWS localmente:
+#### 4. Configure credenciais AWS (opcional para upload S3)
 
 ```bash
+# Configure um profile AWS (ex: "open-meteo")
 aws configure --profile open-meteo
+# Forneça Access Key, Secret Key, region, output
 ```
 
-Forneça `AWS Access Key ID`, `AWS Secret Access Key`, `region` e `output` conforme necessário.
+Ou edite `.env` diretamente:
+```bash
+AWS_ACCESS_KEY_ID=sua-chave
+AWS_SECRET_ACCESS_KEY=sua-secret
+AWS_DEFAULT_REGION=us-east-1
+S3_BUCKET=seu-bucket-s3
+```
 
-5) Verifique a lista de municípios
-
-Confirme que o arquivo `data/lista_municipios/lista_mun.csv` existe e contém as colunas `codigo_ibge`, `nome`, `nome_uf`, `latitude`, `longitude`. Para testes locais, reduza a lista para 1-3 municípios.
-
-6) Executar coleta diária/horária (modo padrão: ambos)
+#### 5. Verifique a lista de municípios
 
 ```bash
-python main.py            # coleta modo 'ambos' (padrão)
+# Arquivo deve existir e conter: codigo_ibge, nome, nome_uf, latitude, longitude
+head data/lista_municipios/lista_mun.csv
+```
+
+## Passo a passo — executar o projeto
+
+### Execução Local (Python)
+
+#### 1. Coleta diária/horária
+
+```bash
+# Coleta modo padrão (ambos: diário + horário)
+python main.py
+
+# Apenas diários
 python main.py --modo diario
+
+# Apenas horários
 python main.py --modo horario
 ```
 
-Os arquivos gerados ficam em `data/raw/` com nomes padronizados (`dados_climaticos_diarios_YYYYMMDD.csv` / `dados_climaticos_horarios_YYYYMMDD.csv`).
+Os arquivos gerados ficam em `data/raw/` com nomes padronizados:
+- `dados_climaticos_diarios_YYYYMMDD.csv`
+- `dados_climaticos_horarios_YYYYMMDD.csv`
 
-7) Executar backfill histórico (Parquet + upload S3)
-
-O script `scripts/backfill_once.py` faz fetch histórico (archive), salva Parquet e realiza upload para S3. Por padrão as datas estão definidas no topo do arquivo em `DATA_INI` e `DATA_FIM`.
-
-- Recomendo testar com um intervalo pequeno (1 dia) e uma lista reduzida de municípios primeiro.
-- Para rodar:
+#### 2. Backfill histórico + upload S3
 
 ```bash
 python scripts/backfill_once.py
 ```
 
-Se desejar limitar a execução a poucos municípios, crie um CSV temporário em `data/lista_municipios/` e aponte o script para ele (ou edite localmente `path_lista` no script para testes).
+Este script:
+- Faz fetch histórico (endpoint `archive` da Open-Meteo)
+- Salva em Parquet (compressão snappy) em `data/raw/diario/` e `data/raw/horario/`
+- Realiza upload para S3 automaticamente
 
-8) Executar upload manualmente
+**Edite o topo do script para alterar:**
+- `DATA_INI` / `DATA_FIM` (intervalo de datas)
+- `SLEEP_BETWEEN_CALLS` (para throttling)
+- `BUCKET` / `PROFILE` (destino S3)
 
-Você também pode chamar diretamente o utilitário de upload:
+### Execução via Docker
 
-```py
-from src.upload_s3 import upload_para_s3
-
-upload_para_s3(caminho_local='data/raw/diario/dados_climaticos_diarios_20251106.parquet',
-               tipo='diario',
-               data_referencia='2025-11-06',
-               bucket='gbrj-open-meteo-datalake',
-               profile='open-meteo')
-```
-
-9) Executar via Docker
-
-O `Dockerfile` e `docker-compose.yml` permitem rodar o job dentro de um container. O `docker-compose.yml` usa `CMD` do `Dockerfile` (por padrão `python main.py --modo ambos`).
-
-Construir e rodar:
+#### 1. Build da imagem
 
 ```bash
 docker-compose build --no-cache
+```
+
+#### 2. Executar container
+
+```bash
+# Executa com comando padrão (python main.py --modo ambos)
 docker-compose up --abort-on-container-exit
+
+# Rodar em background
+docker-compose up -d
+docker-compose logs -f
 ```
 
-Para sobrescrever o comando do container (ex.: rodar apenas diário):
+#### 3. Customizar comando
 
+Edite `docker-compose.yml` e altere o `command`:
+```yaml
+services:
+  openmeteo:
+    # ...
+    command: ["python", "main.py", "--modo", "diario"]
+```
+
+Ou sobrescreva na CLI:
 ```bash
-docker-compose run --rm openmeteo python main.py --modo diario
+docker-compose run --rm openmeteo python main.py --modo horario
 ```
 
-10) Verificação rápida
+#### 4. Variáveis de ambiente
 
-- Verifique `data/raw/` para arquivos gerados.
-- Ao usar S3, confirme no console/AWS CLI que os objetos foram criados no prefixo `raw/clima/{tipo}/date=YYYY-MM-DD/`.
-
-11) Boas práticas
-
-- Teste com 1-3 municípios antes de rodar a coleta completa.
-- Ajuste `SLEEP_BETWEEN_CALLS` e `RETRIES` em `scripts/backfill_once.py` para reduzir taxa de requisições.
-- Use um profile AWS com permissões mínimas necessárias (s3:PutObject).
-
-### Uso
-
-Coletar dados de **ambos os modos** (padrão):
-```bash
-python main.py
+O `docker-compose.yml` lê do arquivo `.env`. Certifique-se que contém:
+```
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_DEFAULT_REGION=us-east-1
+S3_BUCKET=seu-bucket
 ```
 
-Apenas dados **diários**:
-```bash
-python main.py --modo diario
-```
+### Pipeline Databricks (Transformação)
 
-Apenas dados **horários**:
-```bash
-python main.py --modo horario
-```
+Para configurar e executar o pipeline de transformação no Databricks, consulte **[databricks/README.md](./databricks/README.md)**.
 
-### Saída
-
-Os arquivos são salvos em `data/raw/` com nomes padronizados:
-- `dados_climaticos_diarios_YYYYMMDD.csv` (dados diários)
-- `dados_climaticos_horarios_YYYYMMDD.csv` (dados horários)
+Resumo:
+1. Crie um catálogo `open_meteo` com schemas `bronze`, `silver`, `gold`
+2. Configure acesso ao S3 via IAM role ou secrets
+3. Crie um pipeline DLT apontando para os scripts SQL em `databricks/pipeline_dlt/`
+4. Execute: os dados do S3 serão ingeridos e transformados automaticamente
 
 ## 📊 Estrutura de Dados
 
@@ -189,17 +252,44 @@ Os arquivos são salvos em `data/raw/` com nomes padronizados:
 
 ```
 previsao-do-tempo-open-meteo/
-├── main.py                          # Script principal com CLI
-├── requirements.txt                 # Dependências Python
+├── .env.example                     # Template de credenciais (versionado)
+├── .gitignore                       # Exclui .env, credenciais, dados
+├── Dockerfile                       # Imagem Docker
+├── docker-compose.yml               # Orquestração Docker
 ├── README.md                        # Este arquivo
+├── requirements.txt                 # Dependências Python
+├── main.py                          # Script principal com CLI
+│
 ├── src/
 │   ├── recupera_dados_api_dia.py   # Coleta dados diários
 │   ├── recupera_dados_api_hora.py  # Coleta dados horários
-│   └── processa_dados.py           # Processamento e tradução
+│   ├── processa_dados.py           # Processamento e tradução
+│   └── upload_s3.py                # Utilitário de upload S3 (boto3)
+│
+├── scripts/
+│   └── backfill_once.py            # Backfill histórico + upload S3
+│
+├── databricks/
+│   ├── README.md                   # Guia de pipeline Databricks
+│   └── pipeline_dlt/
+│       ├── open_meteo_s3_to_bronze/
+│       │   └── transformations/
+│       │       ├── get_s3_to_bronze_dia.sql
+│       │       └── get_s3_to_bronze_hora.sql
+│       ├── open_meteo_bronze_to_silver/
+│       │   └── transformations/
+│       │       ├── get_bronze_to_silver_dia.sql
+│       │       └── get_bronze_to_silver_hora.sql
+│       └── open_meteo_silver_to_gold/
+│           └── transformations/
+│               └── gold_metricas_clima.sql
+│
 └── data/
     ├── lista_municipios/
     │   └── lista_mun.csv           # Municípios com coordenadas
-    └── raw/                         # CSVs coletados
+    └── raw/
+        ├── diario/                 # Dados diários (local)
+        └── horario/                # Dados horários (local)
 ```
 
 ## 🛠️ Dependências
@@ -209,6 +299,7 @@ previsao-do-tempo-open-meteo/
 - **python-dateutil**: Manipulação de datas/timezones
 - **tqdm**: Barra de progresso
 - **pytz**: Suporte a timezones
+- **boto3**: Cliente AWS S3
 
 ## ⚙️ Configuração
 
@@ -219,6 +310,15 @@ MODO_COLETA_DEFAULT = "ambos"  # "diario" | "horario" | "ambos"
 TIMEZONE = "America/Sao_Paulo"
 ```
 
+Para backfill, edite o topo de `scripts/backfill_once.py`:
+
+```python
+DATA_INI = date(2025, 11, 6)
+DATA_FIM = date(2025, 11, 11)
+BUCKET = "gbrj-open-meteo-datalake"
+PROFILE = "open-meteo"
+```
+
 ## 🔄 Recursos
 
 - ✅ Coleta D-1 (dados do dia anterior)
@@ -227,6 +327,9 @@ TIMEZONE = "America/Sao_Paulo"
 - ✅ Tratamento robusto de erros
 - ✅ Progresso visual (tqdm)
 - ✅ Encoding UTF-8 com BOM para Excel
+- ✅ Upload S3 com particionamento Hive-style
+- ✅ Databricks DLT (Bronze → Silver → Gold)
+- ✅ Docker + Docker Compose
 
 ## 📝 Notas
 
@@ -234,78 +337,69 @@ TIMEZONE = "America/Sao_Paulo"
 - Coleta sempre o D-1 (dia anterior) considerando timezone de São Paulo
 - Em caso de falha na API, há retry automático (máx. 2 tentativas)
 - Dados horários possuem fallback entre archive e forecast APIs
+- **NUNCA commite o arquivo `.env` com credenciais reais**
+- Use `.env.example` como referência para novos contribuidores
 
-## 📖 API Utilizada
+## 🔒 Segurança
 
-[Open-Meteo](https://open-meteo.com/) - API climática gratuita e open-source com dados históricos e previsões.
+### Credenciais
 
-**Última atualização**: Novembro de 2025
-## Backfill histórico
+- `.env` está no `.gitignore` e nunca será versionado
+- Use `.env.example` como template — **sempre mantenha atualizado com novas variáveis**
+- Para CI/CD, configure secrets no GitHub Actions ou similar
 
-O repositório inclui um script de backfill para popular o conjunto de dados históricos em Parquet e enviar para um bucket S3.
+### IAM Permissions (AWS)
 
-- Script: `scripts/backfill_once.py`
-- Gera arquivos Parquet por dia em `data/raw/diario/` e `data/raw/horario/`.
-- Configurações principais (no topo do script): `DATA_INI`, `DATA_FIM`, `BUCKET`, `PROFILE`, `PARQUET_COMPRESSION`.
-- Compressão Parquet: `snappy` (padrão). Engine: `pyarrow`.
+Recomenda-se criar um usuário IAM com permissões mínimas:
 
-Exemplo de execução:
-```bash
-python scripts/backfill_once.py
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::seu-bucket",
+        "arn:aws:s3:::seu-bucket/*"
+      ]
+    }
+  ]
+}
 ```
 
-O script itera sobre a lista de municípios (`data/lista_municipios/lista_mun.csv`), faz chamadas ao endpoint `archive` da Open-Meteo para cada dia e município, salva os Parquets localmente e realiza upload para S3.
+## 🐛 Troubleshooting
 
-## Upload para S3
+### "Arquivo não encontrado: data/lista_municipios/lista_mun.csv"
 
-Existe um utilitário em `src/upload_s3.py` para enviar arquivos ao S3 usando `boto3` e um profile AWS configurado.
+- Certifique-se que o arquivo existe
+- Verifique o caminho e encoding (UTF-8 com BOM recomendado)
 
-- Função: `upload_para_s3(caminho_local, tipo, data_referencia, bucket, profile)`
-- Prefixo S3 (padrão Hive-style): `raw/clima/{tipo}/date=YYYY-MM-DD/{nome_arquivo}`
-- Bucket padrão usado no projeto: `gbrj-open-meteo-datalake` (pode ser alterado no call)
+### "Erro de conexão com S3"
 
-Requisitos para upload:
-- Ter o `boto3` instalado (geralmente já disponível em ambientes que usam AWS SDKs)
-- Ter um profile AWS configurado no `~/.aws/credentials` com o nome passado no parâmetro `profile` (ex: `open-meteo`)
+- Confirme credenciais em `.env`
+- Teste: `aws s3 ls s3://seu-bucket --profile open-meteo`
+- Verifique permissões IAM
 
-Exemplo de uso (via script de backfill):
-```py
-from src.upload_s3 import upload_para_s3
+### Docker não encontra `.env`
 
-upload_para_s3(caminho_local='data/raw/diario/dados_climaticos_diarios_20251106.parquet',
-               tipo='diario',
-               data_referencia='2025-11-06',
-               bucket='gbrj-open-meteo-datalake',
-               profile='open-meteo')
-```
+- Certifique-se que `.env` está na raiz do projeto
+- Run: `docker-compose config` para validar
 
-## Atualizações na Estrutura do Projeto
+## 📚 Referências
 
-Adições relevantes:
+- [Open-Meteo API](https://open-meteo.com/)
+- [Databricks Delta Live Tables](https://docs.databricks.com/workflows/delta-live-tables/)
+- [Medalion Architecture](https://www.databricks.com/blog/2022/06/24/etl-patterns-at-scale-with-medallion-architecture-and-databricks.html)
+- [AWS S3 + IAM](https://docs.aws.amazon.com/s3/)
 
-```
-previsao-do-tempo-open-meteo/
-├── main.py                          # Script principal com CLI
-├── requirements.txt                 # Dependências Python
-├── README.md                        # Este arquivo
-├── scripts/
-│   └── backfill_once.py            # Backfill histórico + upload S3
-├── src/
-│   ├── recupera_dados_api_dia.py   # Coleta dados diários
-│   ├── recupera_dados_api_hora.py  # Coleta dados horários
-│   ├── processa_dados.py           # Processamento e tradução
-│   └── upload_s3.py                # Utilitário de upload para S3 (boto3)
-└── data/
-    ├── lista_municipios/
-    │   └── lista_mun.csv           # Municípios com coordenadas
-    └── raw/                         # CSVs/Parquets coletados
-```
+## 📄 Licença
 
-## Observações importantes
-
-- O script de backfill pode gerar uma carga considerável de requisições à Open-Meteo — ajuste `SLEEP_BETWEEN_CALLS` e `RETRIES` conforme necessário.
-- Confira permissões e custo de armazenamento/transferência do bucket S3 antes de fazer uploads em massa.
-- Teste localmente com um subconjunto pequeno de municípios antes de rodar backfills grandes.
+MIT
 
 ## 👤 Autor
 
