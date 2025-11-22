@@ -315,8 +315,7 @@ Para backfill, edite o topo de `scripts/backfill_once.py`:
 ```python
 DATA_INI = date(2025, 11, 6)
 DATA_FIM = date(2025, 11, 11)
-BUCKET = "gbrj-open-meteo-datalake"
-PROFILE = "open-meteo"
+BUCKET = BUCKET
 ```
 
 ## 🔄 Recursos
