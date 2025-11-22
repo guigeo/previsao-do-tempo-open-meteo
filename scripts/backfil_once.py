@@ -120,7 +120,7 @@ def main():
     path_raw_horario = path_raw / "horario"
 
     df_cidades = load_cidades(path_lista)
-    print(f"📦 Backfill {DATA_INI} → {DATA_FIM} | cidades={len(df_cidades)}")
+    print(f"Backfill {DATA_INI} → {DATA_FIM} | cidades={len(df_cidades)}")
     print("BASE_DIR:", root)
 
     for dia in daterange(DATA_INI, DATA_FIM):
@@ -164,13 +164,13 @@ def main():
             df_out_d = pd.concat(dados_d, ignore_index=True)
             out_d = path_raw_diario / f"dados_climaticos_diarios_{dt_str}.parquet"
             save_parquet(df_out_d, out_d)
-            print(f"✅ Diário salvo (Parquet): {out_d}")
+            print(f"Diário salvo (Parquet): {out_d}")
         else:
-            print("⚠️ Diário vazio nesse dia.")
+            print("Diário vazio nesse dia.")
 
         # ------------------ UPLOAD DIÁRIO ------------------
         if out_d:
-            print("📤 Upload S3 (diario)...")
+            print("Upload S3 (diario)...")
             upload_para_s3(
                 caminho_local=out_d,
                 tipo="diario",
@@ -223,13 +223,13 @@ def main():
             df_out_h = pd.concat(dados_h, ignore_index=True)
             out_h = path_raw_horario / f"dados_climaticos_horarios_{dt_str}.parquet"
             save_parquet(df_out_h, out_h)
-            print(f"✅ Horário salvo (Parquet): {out_h}")
+            print(f"Horário salvo (Parquet): {out_h}")
         else:
-            print("⚠️ Horário vazio nesse dia.")
+            print("Horário vazio nesse dia.")
 
         # ------------------ UPLOAD HORÁRIO ------------------
         if out_h:
-            print("📤 Upload S3 (horario)...")
+            print("Upload S3 (horario)...")
             upload_para_s3(
                 caminho_local=out_h,
                 tipo="horario",  # <- pois sua pasta local é "horario"
@@ -237,7 +237,7 @@ def main():
                 bucket=BUCKET     
             )
 
-    print("\n🎉 Backfill concluído com sucesso!\n")
+    print("\nBackfill concluído com sucesso!\n")
 
 
 if __name__ == "__main__":

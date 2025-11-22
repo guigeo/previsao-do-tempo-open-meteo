@@ -87,7 +87,7 @@ def coleta_diaria(base_dir: Path, dia: date):
     path_ext_raw_diario = base_dir / "data" / "raw" / "diario"
 
     df_cidades = pd.read_csv(path_lista, sep=";")
-    print(f"📅 (DIÁRIO) Coletando {dt_str} para {len(df_cidades)} municípios")
+    print(f"(DIÁRIO) Coletando {dt_str} para {len(df_cidades)} municípios")
 
     dados = []
     falhas = 0
@@ -112,7 +112,7 @@ def coleta_diaria(base_dir: Path, dia: date):
 
     df_final.to_parquet(saida, index=False, engine="pyarrow", compression="snappy")
 
-    print(f"✅ Diário salvo em: {saida}")
+    print(f"Diário salvo em: {saida}")
     if falhas:
         print(f"Atenção: {falhas} município(s) falharam (diário).")
 
@@ -130,7 +130,7 @@ def coleta_horaria(base_dir: Path, dia: date):
     path_ext_raw_horario = base_dir / "data" / "raw" / "horario"
 
     df_cidades = pd.read_csv(path_lista, sep=";")
-    print(f"⏱️ (HORÁRIO) Coletando {dt_str} para {len(df_cidades)} municípios")
+    print(f"(HORÁRIO) Coletando {dt_str} para {len(df_cidades)} municípios")
 
     dados = []
     falhas = 0
@@ -148,7 +148,7 @@ def coleta_horaria(base_dir: Path, dia: date):
             print(f"Falha em {row['nome']}: {e}")
 
     if not dados:
-        print("❌ Nenhum dado horário coletado.")
+        print("Nenhum dado horário coletado.")
         return None
 
     df_final = pd.concat(dados, ignore_index=True)
@@ -175,7 +175,7 @@ def coleta_horaria(base_dir: Path, dia: date):
 
     df_final.to_parquet(saida, index=False, engine="pyarrow", compression="snappy")
 
-    print(f"✅ Horário salvo em: {saida}")
+    print(f"Horário salvo em: {saida}")
     if falhas:
         print(f"Atenção: {falhas} município(s) falharam (horário).")
 
@@ -195,7 +195,7 @@ def main():
     args = parse_args()
     base_dir = _resolve_base_dir()
 
-    print("📁 BASE_DIR:", base_dir)
+    print("BASE_DIR:", base_dir)
 
     datas = _datas_pendentes(base_dir)
 
@@ -203,7 +203,7 @@ def main():
         print("Nenhuma data pendente. Nada a fazer.")
         return
 
-    print("📅 Datas a processar:", [str(d) for d in datas])
+    print("Datas a processar:", [str(d) for d in datas])
 
     # ----------------------------
     # NOVO: armazenar parquets antes do upload
@@ -240,7 +240,7 @@ def main():
 
     # Upload dos diários
     for caminho, dia in arquivos_diarios_gerados:
-        print(f"⬆️  Enviando diário {dia} → {caminho.name}")
+        print(f"Enviando diário {dia} → {caminho.name}")
         upload_para_s3(
             caminho_local=caminho,
             tipo="diario",
@@ -249,7 +249,7 @@ def main():
 
     # Upload dos horários
     for caminho, dia in arquivos_horarios_gerados:
-        print(f"⬆️  Enviando horário {dia} → {caminho.name}")
+        print(f"Enviando horário {dia} → {caminho.name}")
         upload_para_s3(
             caminho_local=caminho,
             tipo="horario",
@@ -262,8 +262,8 @@ def main():
     ultimo_processado = max(datas)
     _salvar_last_run(base_dir, ultimo_processado)
 
-    print(f"\n📌 STATE atualizado para {ultimo_processado}")
-    print("✅ Processo concluído com sucesso!")
+    print(f"STATE atualizado para {ultimo_processado}")
+    print("Processo concluído com sucesso!")
 
 
 

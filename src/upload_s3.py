@@ -9,7 +9,6 @@ def upload_para_s3(
     tipo: str,                # "diarios" ou "horarios"
     data_referencia: str,     # "YYYY-MM-DD"
     bucket: str = BUCKET
-    #profile: str = "open-meteo"
 ):
     """
     Envia um arquivo Parquet para o S3 no prefixo:
@@ -29,7 +28,7 @@ def upload_para_s3(
     # Prefixo S3 no padrão Hive style
     prefix = f"raw/clima/{tipo}/date={data_referencia}/{nome_arquivo}"
 
-    print(f"\n📤 Enviando para S3:")
+    print(f".  Enviando para S3:")
     print(f"   Bucket: {bucket}")
     print(f"   Prefixo: {prefix}")
     print(f"   Arquivo: {caminho_local}")
@@ -41,6 +40,6 @@ def upload_para_s3(
     # Upload (sobrescreve automaticamente se já existir)
     s3.upload_file(str(caminho_local), bucket, prefix)
 
-    print("✅ Upload concluído com sucesso!\n")
+    print("Upload concluído com sucesso!\n")
 
     return f"s3://{bucket}/{prefix}"
