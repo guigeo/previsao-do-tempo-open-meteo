@@ -1,0 +1,101 @@
+codigo_ibge;nome;nome_uf;latitude;longitude
+1302603;Manaus;Amazonas;-3.11866;-60.0212
+1501402;Belém;Pará;-1.4554;-48.4898
+1501600;Bonito;Pará;-1.36745;-47.3066
+1721000;Palmas;Tocantins;-10.24;-48.3558
+2111300;São Luís;Maranhão;-2.53874;-44.2825
+2304400;Fortaleza;Ceará;-3.71664;-38.5423
+2408102;Natal;Rio Grande do Norte;-5.79357;-35.1986
+2412559;São Miguel do Gostoso;Rio Grande do Norte;-5.12302;-35.6354
+2413003;São Vicente;Rio Grande do Norte;-6.21893;-36.6827
+2501906;Belém;Paraíba;-6.74261;-35.5166
+2507507;João Pessoa;Paraíba;-7.11509;-34.8641
+2602308;Bonito;Pernambuco;-8.47163;-35.7292
+2605459;Fernando de Noronha;Pernambuco;-3.8396;-32.4107
+2609600;Olinda;Pernambuco;-8.01017;-34.8545
+2611606;Recife;Pernambuco;-8.04666;-34.8771
+2700805;Belém;Alagoas;-9.57047;-36.4904
+2701506;Campo Grande;Alagoas;-9.95542;-36.7926
+2704302;Maceió;Alagoas;-9.66599;-35.735
+2704500;Maragogi;Alagoas;-9.00744;-35.2267
+2708808;São Sebastião;Alagoas;-9.93043;-36.559
+2800308;Aracaju;Sergipe;-10.9091;-37.0677
+2904050;Bonito;Bahia;-11.9668;-41.2647
+2914901;Itacaré;Bahia;-14.2784;-38.9959
+2919306;Lençóis;Bahia;-12.5616;-41.3928
+2925303;Porto Seguro;Bahia;-16.4435;-39.0643
+2927408;Salvador;Bahia;-12.9718;-38.5011
+3106200;Belo Horizonte;Minas Gerais;-19.9102;-43.9266
+3121605;Diamantina;Minas Gerais;-18.2413;-43.6031
+3146107;Ouro Preto;Minas Gerais;-20.3796;-43.512
+3168200;Tapiraí;Minas Gerais;-19.8936;-46.0221
+3168804;Tiradentes;Minas Gerais;-21.1102;-44.1744
+3202405;Guarapari;Espírito Santo;-20.6772;-40.5093
+3205200;Vila Velha;Espírito Santo;-20.3417;-40.2875
+3205309;Vitória;Espírito Santo;-20.3155;-40.3128
+3300100;Angra dos Reis;Rio de Janeiro;-23.0011;-44.3196
+3300704;Cabo Frio;Rio de Janeiro;-22.8894;-42.0286
+3303401;Nova Friburgo;Rio de Janeiro;-22.2932;-42.5377
+3303807;Paraty;Rio de Janeiro;-23.2221;-44.7175
+3303906;Petrópolis;Rio de Janeiro;-22.52;-43.1926
+3304557;Rio de Janeiro;Rio de Janeiro;-22.9129;-43.2003
+3305802;Teresópolis;Rio de Janeiro;-22.4165;-42.9752
+3501608;Americana;São Paulo;-22.7374;-47.3331
+3502804;Araçatuba;São Paulo;-21.2076;-50.4401
+3502903;Araçoiaba da Serra;São Paulo;-23.5029;-47.6166
+3504107;Atibaia;São Paulo;-23.1171;-46.5563
+3505401;Barra do Turvo;São Paulo;-24.759;-48.5013
+3505500;Barretos;São Paulo;-20.5531;-48.5698
+3509007;Caieiras;São Paulo;-23.3607;-46.7397
+3509502;Campinas;São Paulo;-22.9053;-47.0659
+3509700;Campos do Jordão;São Paulo;-22.7296;-45.5833
+3509908;Cananéia;São Paulo;-25.0144;-47.9341
+3510500;Caraguatatuba;São Paulo;-23.6125;-45.4125
+3513504;Cubatão;São Paulo;-23.8911;-46.424
+3514809;Eldorado;São Paulo;-24.5281;-48.1141
+3516200;Franca;São Paulo;-20.5352;-47.4039
+3520301;Iguape;São Paulo;-24.699;-47.5537
+3520400;Ilhabela;São Paulo;-23.7785;-45.3552
+3520426;Ilha Comprida;São Paulo;-24.7307;-47.5383
+3522109;Itanhaém;São Paulo;-24.1736;-46.788
+3525904;Jundiaí;São Paulo;-23.1852;-46.8974
+3526209;Juquitiba;São Paulo;-23.9244;-47.0653
+3529906;Miracatu;São Paulo;-24.2766;-47.4625
+3530607;Mogi das Cruzes;São Paulo;-23.5208;-46.1854
+3537206;Pedro de Toledo;São Paulo;-24.2764;-47.2354
+3537602;Peruíbe;São Paulo;-24.312;-47.0012
+3538709;Piracicaba;São Paulo;-22.7338;-47.6476
+3541000;Praia Grande;São Paulo;-24.0084;-46.4121
+3542602;Registro;São Paulo;-24.4979;-47.8449
+3543402;Ribeirão Preto;São Paulo;-21.1699;-47.8099
+3548500;Santos;São Paulo;-23.9535;-46.335
+3548906;São Carlos;São Paulo;-22.0174;-47.886
+3550308;São Paulo;São Paulo;-23.5329;-46.6395
+3550704;São Sebastião;São Paulo;-23.7951;-45.4143
+3551009;São Vicente;São Paulo;-23.9574;-46.3883
+3551801;Sete Barras;São Paulo;-24.382;-47.9279
+3552205;Sorocaba;São Paulo;-23.4969;-47.4451
+3552502;Suzano;São Paulo;-23.5448;-46.3112
+3553500;Tapiraí;São Paulo;-23.9612;-47.5062
+3554102;Taubaté;São Paulo;-23.0104;-45.5593
+3555406;Ubatuba;São Paulo;-23.4332;-45.0834
+4106902;Curitiba;Paraná;-25.4195;-49.2646
+4108304;Foz do Iguaçu;Paraná;-25.5427;-54.5827
+4117602;Palmas;Paraná;-26.4839;-51.9888
+4202008;Balneário Camboriú;Santa Catarina;-26.9926;-48.6352
+4203204;Camboriú;Santa Catarina;-27.0241;-48.6503
+4205407;Florianópolis;Santa Catarina;-27.5945;-48.5477
+4208203;Itajaí;Santa Catarina;-26.9101;-48.6705
+4213807;Praia Grande;Santa Catarina;-29.1918;-49.9525
+4216008;São Carlos;Santa Catarina;-27.0798;-53.0037
+4303608;Cambará do Sul;Rio Grande do Sul;-29.0474;-50.1465
+4304408;Canela;Rio Grande do Sul;-29.356;-50.8119
+4309100;Gramado;Rio Grande do Sul;-29.3734;-50.8762
+4314902;Porto Alegre;Rio Grande do Sul;-30.0318;-51.2065
+5002209;Bonito;Mato Grosso do Sul;-21.1261;-56.4836
+5002704;Campo Grande;Mato Grosso do Sul;-20.4486;-54.6295
+5003751;Eldorado;Mato Grosso do Sul;-23.7868;-54.2838
+5103403;Cuiabá;Mato Grosso;-15.601;-56.0974
+5204508;Caldas Novas;Goiás;-17.7441;-48.6246
+5208707;Goiânia;Goiás;-16.6864;-49.2643
+5300108;Brasília;Distrito Federal;-15.7795;-47.9297
