@@ -2,7 +2,7 @@
 
 **Arquitetura End-to-End:** Python/Docker → S3 → Databricks Lakehouse (Medalion)
 
-Sistema completo para coleta automatizada de dados climáticos, processamento em pipeline e transformação em **Lakehouse** usando Databricks.
+Sistema completo para coleta automatizada de dados climáticos, (Top 100 cidades Turísticas do Brasil) processamento em pipeline e transformação em **Lakehouse** usando Databricks.
 
 ## 📌 Arquitetura
 
