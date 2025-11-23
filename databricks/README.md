@@ -237,7 +237,3 @@ s3://gbrj-open-meteo-datalake/raw/clima/horario/date=2025-11-21/dados_climaticos
 - [Databricks Delta Live Tables](https://docs.databricks.com/workflows/delta-live-tables/)
 - [Medalion Architecture](https://www.databricks.com/blog/2022/06/24/etl-patterns-at-scale-with-medallion-architecture-and-databricks.html)
 - [Cloud Files (Auto Loader)](https://docs.databricks.com/en/ingestion/cloud-object-storage/index.html)
-
-## 👤 Suporte
-
-Para dúvidas sobre os pipelines Databricks, consulte o time de Data Engineering.
