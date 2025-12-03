@@ -4,7 +4,7 @@
 -- Aplica conversão de tipos, normalização
 -- ===========================================================
 
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_diario
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_dia_dia
 COMMENT "Silver — Clima diário limpo, tipado, deduplicado e pronto para analytics"
 TBLPROPERTIES ("quality" = "silver")
 PARTITIONED BY (ano,mes)
@@ -63,7 +63,7 @@ WITH bronze AS (
 
       CAST(codigo_tempo_wmo AS INT) AS codigo_tempo_wmo,
       ingested_at
-  FROM STREAM(open_meteo.bronze.clima_diario)
+  FROM STREAM(open_meteo.bronze.clima_dia_dia)
 ),
 
 stage AS (
