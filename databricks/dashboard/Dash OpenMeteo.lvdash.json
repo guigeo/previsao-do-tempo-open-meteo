@@ -60,7 +60,7 @@
   "pages": [
     {
       "name": "c5deb693",
-      "displayName": "Temperaturas Minímas e Máximas",
+      "displayName": "Cidades",
       "layout": [
         {
           "widget": {
@@ -162,7 +162,7 @@
           },
           "position": {
             "x": 0,
-            "y": 3,
+            "y": 0,
             "width": 3,
             "height": 6
           }
@@ -269,15 +269,22 @@
             }
           },
           "position": {
-            "x": 0,
-            "y": 9,
+            "x": 3,
+            "y": 0,
             "width": 3,
-            "height": 5
+            "height": 6
           }
-        },
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "a9ffb559",
+      "displayName": "Dias",
+      "layout": [
         {
           "widget": {
-            "name": "3dd3e7e1",
+            "name": "a6d9dde3",
             "queries": [
               {
                 "name": "main_query",
@@ -340,15 +347,15 @@
             }
           },
           "position": {
-            "x": 3,
-            "y": 3,
+            "x": 0,
+            "y": 0,
             "width": 3,
             "height": 6
           }
         },
         {
           "widget": {
-            "name": "bd2d8e74",
+            "name": "bc00e533",
             "queries": [
               {
                 "name": "main_query",
@@ -447,14 +454,21 @@
           },
           "position": {
             "x": 3,
-            "y": 9,
+            "y": 0,
             "width": 3,
-            "height": 5
+            "height": 6
           }
-        },
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "577e16e8",
+      "displayName": "Controle da Carga",
+      "layout": [
         {
           "widget": {
-            "name": "71924b4c",
+            "name": "e6d79712",
             "queries": [
               {
                 "name": "main_query",
@@ -544,8 +558,8 @@
           "position": {
             "x": 0,
             "y": 0,
-            "width": 2,
-            "height": 3
+            "width": 3,
+            "height": 4
           }
         }
       ],
