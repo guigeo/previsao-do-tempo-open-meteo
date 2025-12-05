@@ -1,0 +1,441 @@
+{
+  "datasets": [
+    {
+      "name": "7a7d46bb",
+      "displayName": "temp_max_muns_top10",
+      "queryLines": [
+        "SELECT * FROM open_meteo.gold.temp_max_muns_top10"
+      ],
+      "catalog": "open_meteo",
+      "schema": "gold"
+    },
+    {
+      "name": "a4575982",
+      "displayName": "temp_mins_muns_top10",
+      "queryLines": [
+        "SELECT * FROM open_meteo.gold.temp_mins_muns_top10"
+      ],
+      "catalog": "open_meteo",
+      "schema": "gold"
+    },
+    {
+      "name": "d418fb36",
+      "displayName": "temp_max_dias_top10",
+      "queryLines": [
+        "SELECT * FROM open_meteo.gold.temp_max_dias_top10"
+      ]
+    },
+    {
+      "name": "6e1b49e3",
+      "displayName": "temp_mins_dias_top10",
+      "queryLines": [
+        "SELECT * FROM open_meteo.gold.temp_mins_dias_top10"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "c5deb693",
+      "displayName": "Temperaturas Minímas e Máximas",
+      "layout": [
+        {
+          "widget": {
+            "name": "e24c2882",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7a7d46bb",
+                  "fields": [
+                    {
+                      "name": "sum(temp_max_c)",
+                      "expression": "SUM(`temp_max_c`)"
+                    },
+                    {
+                      "name": "mun_uf",
+                      "expression": "`mun_uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(temp_max_c)",
+                  "axis": {
+                    "title": "Temperatura",
+                    "labelAngle": 45
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "mun_uf",
+                  "axis": {
+                    "title": "Municípios"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Municípios Máximas Temperaturas\n"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "4e94379c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a4575982",
+                  "fields": [
+                    {
+                      "name": "sum(temp_min_c)",
+                      "expression": "SUM(`temp_min_c`)"
+                    },
+                    {
+                      "name": "mun_uf",
+                      "expression": "`mun_uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(temp_min_c)",
+                  "axis": {
+                    "title": "Temperatura"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "mun_uf",
+                  "axis": {
+                    "title": "Municípios"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Municípios Minímas Temperaturas"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "3dd3e7e1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d418fb36",
+                  "fields": [
+                    {
+                      "name": "sum(temp_max_c)",
+                      "expression": "SUM(`temp_max_c`)"
+                    },
+                    {
+                      "name": "daily(data)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(temp_max_c)",
+                  "axis": {
+                    "labelAngle": 45,
+                    "title": "Temperatura"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "all"
+                    },
+                    "hideGroupSeparator": false
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "daily(data)",
+                  "displayName": "Dia",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Dias Máximas Temperaturas"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bd2d8e74",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6e1b49e3",
+                  "fields": [
+                    {
+                      "name": "sum(temp_min_c)",
+                      "expression": "SUM(`temp_min_c`)"
+                    },
+                    {
+                      "name": "daily(data)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(temp_min_c)",
+                  "axis": {
+                    "title": "Temperatura"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "daily(data)",
+                  "displayName": "Dia",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Dias Minímas Temperaturas"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 6,
+            "width": 3,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
