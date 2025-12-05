@@ -31,6 +31,30 @@
       "queryLines": [
         "SELECT * FROM open_meteo.gold.temp_mins_dias_top10"
       ]
+    },
+    {
+      "name": "ce649dc1",
+      "displayName": "controle_carga",
+      "queryLines": [
+        "SELECT \r\n",
+        "  metric as metricas,\r\n",
+        "  value as valor\r\n",
+        "FROM (\r\n",
+        "  SELECT \r\n",
+        "    CAST(min(data) AS STRING) as inicio_carga,\r\n",
+        "    CAST(max(data) AS STRING) as carga_atual,\r\n",
+        "    CAST(count(data) AS STRING) as tt_dias_processados\r\n",
+        "  FROM (\r\n",
+        "    SELECT data FROM open_meteo.silver.clima_dia_dia GROUP BY data\r\n",
+        "  )\r\n",
+        ") \r\n",
+        "LATERAL VIEW stack(\r\n",
+        "  3, \r\n",
+        "  'Início da Carga', inicio_carga, \r\n",
+        "  'Data Atual', carga_atual, \r\n",
+        "  'Total de dias Processados', tt_dias_processados\r\n",
+        ") as metric, value"
+      ]
     }
   ],
   "pages": [
@@ -138,7 +162,7 @@
           },
           "position": {
             "x": 0,
-            "y": 0,
+            "y": 3,
             "width": 3,
             "height": 6
           }
@@ -246,7 +270,7 @@
           },
           "position": {
             "x": 0,
-            "y": 6,
+            "y": 9,
             "width": 3,
             "height": 5
           }
@@ -317,7 +341,7 @@
           },
           "position": {
             "x": 3,
-            "y": 0,
+            "y": 3,
             "width": 3,
             "height": 6
           }
@@ -423,9 +447,105 @@
           },
           "position": {
             "x": 3,
-            "y": 6,
+            "y": 9,
             "width": 3,
             "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "71924b4c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ce649dc1",
+                  "fields": [
+                    {
+                      "name": "metricas",
+                      "expression": "`metricas`"
+                    },
+                    {
+                      "name": "valor",
+                      "expression": "`valor`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "metricas",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "*",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "valor",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "*",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 3
           }
         }
       ],
