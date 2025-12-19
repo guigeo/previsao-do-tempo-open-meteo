@@ -55,6 +55,13 @@
         "  'Total de dias Processados', tt_dias_processados\r\n",
         ") as metric, value"
       ]
+    },
+    {
+      "name": "2f945cba",
+      "displayName": "media_temp_chuva_muns",
+      "queryLines": [
+        "SELECT * FROM open_meteo.gold.media_temp_chuva_muns"
+      ]
     }
   ],
   "pages": [
@@ -463,6 +470,308 @@
       "pageType": "PAGE_TYPE_CANVAS"
     },
     {
+      "name": "7f398620",
+      "displayName": "Médias",
+      "layout": [
+        {
+          "widget": {
+            "name": "6b4aec06",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2f945cba",
+                  "fields": [
+                    {
+                      "name": "sum(media_chuva_mm)",
+                      "expression": "SUM(`media_chuva_mm`)"
+                    },
+                    {
+                      "name": "mun_uf",
+                      "expression": "`mun_uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "mun_uf",
+                  "axis": {
+                    "title": "Cidades",
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "natural-order"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(media_chuva_mm)",
+                  "axis": {
+                    "hideTitle": true,
+                    "hideLabels": false,
+                    "hideGrid": false
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true,
+                  "text": {
+                    "fieldName": "sum(media_chuva_mm)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Média de precipitação",
+                "showDescription": true,
+                "description": "*em milímetros"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "2bb90fb7",
+            "queries": [
+              {
+                "name": "dashboards/01f0d2244bb21fa6ac5db23b5c2c3b91/datasets/01f0d54921b914c6978750cbea1cf3ee_uf",
+                "query": {
+                  "datasetName": "2f945cba",
+                  "fields": [
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "uf_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "uf",
+                    "queryName": "dashboards/01f0d2244bb21fa6ac5db23b5c2c3b91/datasets/01f0d54921b914c6978750cbea1cf3ee_uf"
+                  }
+                ]
+              },
+              "disallowAll": true,
+              "frame": {
+                "showTitle": true,
+                "title": "Filtro UF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "2a698d2c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2f945cba",
+                  "fields": [
+                    {
+                      "name": "sum(media_temperatura)",
+                      "expression": "SUM(`media_temperatura`)"
+                    },
+                    {
+                      "name": "mun_uf",
+                      "expression": "`mun_uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "mun_uf",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true,
+                  "text": {
+                    "fieldName": "sum(media_temperatura)",
+                    "displayName": "*"
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "hide": true
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "sum(media_temperatura)"
+                      }
+                    ]
+                  },
+                  "secondary": {
+                    "fields": []
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  },
+                  "axis": {
+                    "hideTitle": true,
+                    "hideLabels": false,
+                    "hideGrid": false
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Média de temperatura"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
       "name": "577e16e8",
       "displayName": "Controle da Carga",
       "layout": [
@@ -564,6 +873,11 @@
         }
       ],
       "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "0cae1a6a",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
     }
   ],
   "uiSettings": {
