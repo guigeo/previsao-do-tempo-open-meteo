@@ -1,4 +1,4 @@
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.bronze.clima_horario
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.bronze.clima_hora_hora
 COMMENT "Bronze — clima horario a partir de raw s3"
 TBLPROPERTIES ("quality" = "bronze")
 AS
@@ -26,4 +26,4 @@ FROM cloud_files(
     "cloudFiles.schemaEvolutionMode", "addNewColumns",
     "pathGlobFilter", "*.parquet"
   )
-);    
+);

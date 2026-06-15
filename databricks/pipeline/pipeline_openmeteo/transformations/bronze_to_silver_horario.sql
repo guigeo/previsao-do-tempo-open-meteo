@@ -4,7 +4,7 @@
 -- Conversão de tipos, de-para UF, normalização
 -- ===========================================================
 
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_horario
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_hora_hora
 COMMENT "Silver — Clima horário limpo, tipado, enriquecido e pronto para analytics"
 TBLPROPERTIES ("quality" = "silver")
 PARTITIONED BY (ano,mes)
@@ -57,7 +57,7 @@ WITH bronze AS (
       LOWER(fonte) AS fonte,
 
       ingested_at
-  FROM STREAM(open_meteo.bronze.clima_horario)
+  FROM STREAM(open_meteo.bronze.clima_hora_hora)
 ),
 
 stage AS (

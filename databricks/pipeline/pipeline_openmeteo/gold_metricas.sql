@@ -9,7 +9,7 @@
 -- Uma linha por (data × cidade), com métricas derivadas
 -- ===========================================================
 
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.gold.clima_diario_historico
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.gold.clima_dia_historico
 COMMENT "Gold — Série histórica diária por cidade, com métricas derivadas"
 TBLPROPERTIES ("quality" = "gold")
 PARTITIONED BY (ano, mes)
@@ -69,13 +69,13 @@ SELECT
 
     ingested_at
 
-FROM STREAM(open_meteo.silver.clima_diario);
+FROM STREAM(open_meteo.silver.clima_dia_dia);
 
 ----------------------------------------------------------------
 -- GOLD 2: clima_extremos
 -- Para cada dia, qual município registrou o MAIOR/MENOR valor
 ----------------------------------------------------------------
-CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_extremos
+CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_extremo
 COMMENT "Gold — Extremos climáticos por dia (versão batch)"
 TBLPROPERTIES ("quality" = "gold")
 PARTITIONED BY (ano, mes)
@@ -98,7 +98,7 @@ WITH base AS (
         mes,
         dia,
         ingested_at
-    FROM open_meteo.silver.clima_diario   -- 🔥 sem STREAM aqui
+    FROM open_meteo.silver.clima_dia_dia   -- 🔥 sem STREAM aqui
 ),
 
 -- EXTREMOS POR DIA
@@ -149,7 +149,7 @@ SELECT * FROM extremos;
 -- GOLD 3 — Tendências Climáticas (7 dias, 30 dias, anomalias)
 -- ===========================================================
 
-CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_tendencias
+CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_tendencia
 COMMENT "Gold — Tendências de clima por dia e cidade (médias móveis, anomalias)"
 TBLPROPERTIES ("quality" = "gold")
 PARTITIONED BY (ano, mes)
@@ -171,7 +171,7 @@ WITH base AS (
         mes,
         dia,
         ingested_at
-    FROM open_meteo.gold.clima_diario_historico
+    FROM open_meteo.gold.clima_dia_historico
 ),
 
 enriquecida AS (
@@ -265,7 +265,7 @@ FROM tendencias;
 -- GOLD 4 — Clima Horário Analítico
 -- ===========================================================
 
-CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_horario_analitico
+CREATE OR REFRESH LIVE TABLE open_meteo.gold.clima_hora_analitico
 COMMENT "Gold — Séries horárias por cidade com métricas derivadas"
 TBLPROPERTIES ("quality" = "gold")
 PARTITIONED BY (ano, mes)
@@ -286,7 +286,7 @@ WITH base AS (
         mes,
         dia,
         ingested_at
-    FROM open_meteo.silver.clima_horario
+    FROM open_meteo.silver.clima_hora_hora
 ),
 
 enriquecida AS (
