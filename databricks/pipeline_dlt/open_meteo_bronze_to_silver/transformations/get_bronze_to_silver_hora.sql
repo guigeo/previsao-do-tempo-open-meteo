@@ -13,6 +13,7 @@ WITH bronze AS (
 
   SELECT
       CAST(data_hora AS TIMESTAMP) AS data_hora,
+      CAST(codigo_ibge AS BIGINT) AS codigo_ibge,
       UPPER(municipio) AS municipio,
 
       CASE uf
@@ -53,6 +54,8 @@ WITH bronze AS (
       CAST(precipitacao_mm AS DOUBLE) AS precipitacao_mm,
       CAST(velocidade_vento_ms AS DOUBLE) AS velocidade_vento_ms,
 
+      LOWER(fonte) AS fonte,
+
       ingested_at
   FROM STREAM(open_meteo.bronze.clima_horario)
 ),
@@ -68,6 +71,7 @@ stage AS (
 
 SELECT
     data_hora,
+    codigo_ibge,
     municipio,
     uf,
     latitude,
@@ -77,6 +81,8 @@ SELECT
     COALESCE(umidade_relativa, 0) AS umidade_relativa,
     COALESCE(precipitacao_mm, 0) AS precipitacao_mm,
     COALESCE(velocidade_vento_ms, 0) AS velocidade_vento_ms,
+
+    COALESCE(fonte, 'archive') AS fonte,
 
     ano,
     mes,

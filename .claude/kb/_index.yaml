@@ -1,0 +1,83 @@
+# Knowledge Base Index
+# Machine-readable registry for KB domains
+
+version: "1.0"
+last_updated: "2026-06-14"
+
+# File Size Limits (SINGLE SOURCE OF TRUTH)
+limits:
+  quick_reference: 100
+  concept: 150
+  pattern: 200
+  spec: null
+
+# Templates
+templates:
+  - name: concept
+    path: _templates/concept.md.template
+  - name: pattern
+    path: _templates/pattern.md.template
+  - name: index
+    path: _templates/index.md.template
+  - name: quick-reference
+    path: _templates/quick-reference.md.template
+  - name: spec
+    path: _templates/spec.yaml.template
+  - name: test-case
+    path: _templates/test-case.json.template
+  - name: domain-manifest
+    path: _templates/domain-manifest.yaml.template
+
+# Domain Registry — add entries here via /create-kb
+domains:
+  delta-lake:
+    name: Delta Lake
+    description: Transaction log/ACID, time travel, MERGE, schema evolution, manutenção de tabelas
+    path: delta-lake/
+    entry_points: { index: index.md, quick_reference: quick-reference.md }
+    concepts:
+      - { name: transaction-log-and-acid, path: concepts/transaction-log-and-acid.md, confidence: 0.95 }
+      - { name: schema-evolution-and-enforcement, path: concepts/schema-evolution-and-enforcement.md, confidence: 0.95 }
+    patterns:
+      - { name: merge-upsert, path: patterns/merge-upsert.md }
+      - { name: table-maintenance, path: patterns/table-maintenance.md }
+
+  databricks-lakeflow:
+    name: Databricks Lakeflow
+    description: Spark Declarative Pipelines (ex-DLT) — streaming tables, expectations, Auto Loader, AUTO CDC, Free Edition
+    path: databricks-lakeflow/
+    entry_points: { index: index.md, quick_reference: quick-reference.md }
+    concepts:
+      - { name: streaming-tables-vs-materialized-views, path: concepts/streaming-tables-vs-materialized-views.md, confidence: 0.95 }
+      - { name: pipeline-expectations, path: concepts/pipeline-expectations.md, confidence: 0.95 }
+      - { name: unity-catalog-basics, path: concepts/unity-catalog-basics.md, confidence: 0.90 }
+      - { name: free-edition-constraints, path: concepts/free-edition-constraints.md, confidence: 0.95 }
+    patterns:
+      - { name: autoloader-ingestion, path: patterns/autoloader-ingestion.md }
+      - { name: auto-cdc-scd, path: patterns/auto-cdc-scd.md }
+      - { name: jobs-orchestration, path: patterns/jobs-orchestration.md }
+      - { name: autoria-streaming-table, path: patterns/autoria-streaming-table.md }
+
+  arquitetura-medalhao:
+    name: Arquitetura Medalhão
+    description: Camadas Bronze/Silver/Gold — responsabilidades, contratos, idempotência, modelagem
+    path: arquitetura-medalhao/
+    entry_points: { index: index.md, quick_reference: quick-reference.md }
+    concepts:
+      - { name: responsabilidades-das-camadas, path: concepts/responsabilidades-das-camadas.md, confidence: 0.95 }
+      - { name: idempotencia-e-reprocessamento, path: concepts/idempotencia-e-reprocessamento.md, confidence: 0.95 }
+    patterns:
+      - { name: contratos-e-nomenclatura, path: patterns/contratos-e-nomenclatura.md }
+      - { name: modelagem-silver-e-gold, path: patterns/modelagem-silver-e-gold.md }
+
+  qualidade-de-dados:
+    name: Qualidade de Dados
+    description: Dimensões de qualidade, quarentena/rejeição/alerta, expectations, deduplicação
+    path: qualidade-de-dados/
+    entry_points: { index: index.md, quick_reference: quick-reference.md }
+    concepts:
+      - { name: dimensoes-de-qualidade, path: concepts/dimensoes-de-qualidade.md, confidence: 0.95 }
+      - { name: quarentena-rejeicao-alerta, path: concepts/quarentena-rejeicao-alerta.md, confidence: 0.95 }
+    patterns:
+      - { name: expectativas-declarativas, path: patterns/expectativas-declarativas.md }
+      - { name: deduplicacao-chaves-naturais, path: patterns/deduplicacao-chaves-naturais.md }

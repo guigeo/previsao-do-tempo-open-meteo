@@ -1,0 +1,30 @@
+# Domain manifest — delta-lake
+# NOTE: registration is done centrally. Copy the block below into
+# .claude/kb/_index.yaml under 'domains:'. Do not edit _index.yaml here.
+#
+# validated: 2026-06-10 (model knowledge, cutoff 2026-01)
+# library_version: Delta Lake 3.x (Databricks Runtime managed)
+
+delta-lake:
+  name: Delta Lake
+  description: >-
+    General Delta Lake knowledge: transaction log and ACID guarantees,
+    time travel, MERGE/upsert, schema evolution and enforcement,
+    OPTIMIZE/liquid clustering, VACUUM, and Change Data Feed.
+    Project-agnostic and reusable across projects.
+  path: delta-lake/
+  entry_points:
+    index: index.md
+    quick_reference: quick-reference.md
+  concepts:
+    - name: transaction-log-and-acid
+      path: concepts/transaction-log-and-acid.md
+      confidence: 0.95
+    - name: schema-evolution-and-enforcement
+      path: concepts/schema-evolution-and-enforcement.md
+      confidence: 0.95
+  patterns:
+    - name: merge-upsert
+      path: patterns/merge-upsert.md
+    - name: table-maintenance
+      path: patterns/table-maintenance.md

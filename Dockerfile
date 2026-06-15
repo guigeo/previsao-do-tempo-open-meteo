@@ -1,22 +1,26 @@
-# Imagem base oficial do Python, versão leve
+# Imagem base oficial do Python + uv (gerenciador de dependências)
 FROM python:3.11-slim
 
-# Evita criação de .pyc e melhora logs
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Copia os binários do uv da imagem oficial
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Define a pasta de trabalho dentro do container
+# Evita .pyc, melhora logs e compila bytecode na instalação
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
 WORKDIR /app
 
-# Copia somente o requirements primeiro (melhora cache de build)
-COPY requirements.txt .
+# Instala as dependências primeiro (melhora cache de build)
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
 
-# Instala as dependências do projeto
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Agora copia TODO o código do projeto para dentro da imagem
+# Copia o restante do código
 COPY . .
 
-# Comando padrão quando o container subir
-# Você pode trocar "ambos" por "diario" ou "horario" se quiser
+# Coloca o venv do projeto no PATH (entrypoint usa o python do venv)
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Comando padrão: troque "ambos" por "diario"/"horario" se quiser
 CMD ["python", "main.py", "--modo", "ambos"]

@@ -1,0 +1,30 @@
+# Domain manifest — arquitetura-medalhao
+# NOTE: registration is done centrally. Copy the block below into
+# .claude/kb/_index.yaml under 'domains:'. Do not edit _index.yaml here.
+#
+# validated: 2026-06-10 (domínio conceitual; práticas estáveis de lakehouse)
+# library_version: n/a (conceitual)
+
+arquitetura-medalhao:
+  name: Arquitetura Medalhão
+  description: >-
+    Conhecimento geral de arquitetura medalhão (lakehouse): responsabilidades
+    das camadas Bronze/Silver/Gold, contratos entre camadas, nomenclatura,
+    idempotência e reprocessamento, modelagem na Silver e serving na Gold.
+    Agnóstico de projeto — reaproveitável.
+  path: arquitetura-medalhao/
+  entry_points:
+    index: index.md
+    quick_reference: quick-reference.md
+  concepts:
+    - name: responsabilidades-das-camadas
+      path: concepts/responsabilidades-das-camadas.md
+      confidence: 0.95
+    - name: idempotencia-e-reprocessamento
+      path: concepts/idempotencia-e-reprocessamento.md
+      confidence: 0.95
+  patterns:
+    - name: contratos-e-nomenclatura
+      path: patterns/contratos-e-nomenclatura.md
+    - name: modelagem-silver-e-gold
+      path: patterns/modelagem-silver-e-gold.md

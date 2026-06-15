@@ -4,6 +4,7 @@ TBLPROPERTIES ("quality" = "bronze")
 AS
 SELECT
     CAST(data_hora AS STRING)           AS data_hora,
+    CAST(codigo_ibge AS STRING)         AS codigo_ibge,
     CAST(municipio AS STRING)           AS municipio,
     CAST(uf AS STRING)                  AS uf,
 
@@ -14,6 +15,7 @@ SELECT
     CAST(umidade_relativa AS STRING)    AS umidade_relativa,
     CAST(precipitacao_mm AS STRING)     AS precipitacao_mm,
     CAST(velocidade_vento_ms AS STRING) AS velocidade_vento_ms,
+    CAST(fonte AS STRING)               AS fonte,
     current_timestamp()               AS ingested_at
 FROM cloud_files(
   "${input_path_horario}",

@@ -1,0 +1,30 @@
+# Domain manifest — qualidade-de-dados
+# NOTE: registration is done centrally. Copy the block below into
+# .claude/kb/_index.yaml under 'domains:'. Do not edit _index.yaml here.
+#
+# validated: 2026-06-10 (domínio conceitual; práticas estáveis)
+# library_version: n/a (conceitual; exemplos com DLT expectations)
+
+qualidade-de-dados:
+  name: Qualidade de Dados
+  description: >-
+    Conhecimento geral de qualidade de dados em pipelines: dimensões de
+    qualidade, validação por fronteira, quarentena vs rejeição vs alerta,
+    expectativas declarativas, deduplicação por chave natural e
+    monitoramento. Agnóstico de projeto — reaproveitável.
+  path: qualidade-de-dados/
+  entry_points:
+    index: index.md
+    quick_reference: quick-reference.md
+  concepts:
+    - name: dimensoes-de-qualidade
+      path: concepts/dimensoes-de-qualidade.md
+      confidence: 0.95
+    - name: quarentena-rejeicao-alerta
+      path: concepts/quarentena-rejeicao-alerta.md
+      confidence: 0.95
+  patterns:
+    - name: expectativas-declarativas
+      path: patterns/expectativas-declarativas.md
+    - name: deduplicacao-chaves-naturais
+      path: patterns/deduplicacao-chaves-naturais.md
