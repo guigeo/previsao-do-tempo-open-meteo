@@ -1,0 +1,43 @@
+# Domain manifest — databricks-lakeflow
+# NOTE: registration is done centrally. To register, copy the block below
+# into .claude/kb/_index.yaml under 'domains:'. Do not edit _index.yaml here.
+#
+# mcp_validated: 2026-06-10
+# sources: docs.databricks.com (AWS), learn.microsoft.com/azure/databricks (via ref-tools + Exa)
+# library_version: Lakeflow Spark Declarative Pipelines (managed service, ex-DLT;
+#   docs current as of 2026-06; Python module `pyspark.pipelines`, AUTO CDC API generation)
+
+databricks-lakeflow:
+  name: Databricks Lakeflow
+  description: >-
+    General knowledge of Databricks Lakeflow Spark Declarative Pipelines
+    (formerly Delta Live Tables): streaming tables, materialized views,
+    expectations, Auto Loader, AUTO CDC/SCD, jobs orchestration, Unity
+    Catalog basics, and Free Edition constraints. Project-agnostic and
+    reusable across projects.
+  path: databricks-lakeflow/
+  entry_points:
+    index: index.md
+    quick_reference: quick-reference.md
+  concepts:
+    - name: streaming-tables-vs-materialized-views
+      path: concepts/streaming-tables-vs-materialized-views.md
+      confidence: 0.95
+    - name: pipeline-expectations
+      path: concepts/pipeline-expectations.md
+      confidence: 0.95
+    - name: unity-catalog-basics
+      path: concepts/unity-catalog-basics.md
+      confidence: 0.90
+    - name: free-edition-constraints
+      path: concepts/free-edition-constraints.md
+      confidence: 0.95
+  patterns:
+    - name: autoloader-ingestion
+      path: patterns/autoloader-ingestion.md
+    - name: auto-cdc-scd
+      path: patterns/auto-cdc-scd.md
+    - name: jobs-orchestration
+      path: patterns/jobs-orchestration.md
+    - name: autoria-streaming-table
+      path: patterns/autoria-streaming-table.md

@@ -1,0 +1,43 @@
+# Vínculo com o claude-project-template — usado por /template-update, /distill e /contribute
+template_path: /Users/gui_ramos/Projetos/0_modelo-base-projeto-sdd-agent-spec
+template_version: d83a9432d196b439d87d6a5699d51359c0c520d4
+catalog_version: "1.0"
+created_at: "2026-06-14"
+created_via: adopt
+selection:
+  stacks: [python, databricks, dlt, delta-lake]
+  domains: [data-pipeline]
+  clouds: [aws, databricks]
+components:
+  agents:
+    - brainstorm-agent
+    - define-agent
+    - design-agent
+    - build-agent
+    - ship-agent
+    - iterate-agent
+    - prompt-crafter
+    - dev-loop-executor
+    - codebase-explorer
+    - kb-architect
+    - adaptive-explainer
+    - meeting-analyst
+    - the-planner
+    - code-reviewer
+    - code-documenter
+    - code-cleaner
+    - python-developer
+    - test-generator
+    - ai-data-engineer
+    - medallion-architect
+    - lakeflow-architect
+    - lakeflow-expert
+    - lakeflow-pipeline-builder
+  kbs:
+    - delta-lake
+    - databricks-lakeflow
+    - arquitetura-medalhao
+    - qualidade-de-dados
+# Agentes criados localmente no filho (não vêm do template):
+#   - previsao-do-tempo-open-meteo-expert (domínio/negócio)
+#   - pipeline-developer (transformações de dados)
