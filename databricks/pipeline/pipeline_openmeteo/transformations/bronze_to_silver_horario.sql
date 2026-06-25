@@ -2,6 +2,12 @@
 -- SILVER: clima_horario
 -- Depende de open_meteo.bronze.clima_horario
 -- Conversão de tipos, de-para UF, normalização
+--
+-- GAP CONHECIDO: registros horários anteriores a 2026-03-06 têm
+-- codigo_ibge e fonte NULL — o Parquet de origem no S3 daquele
+-- período foi gerado por uma versão do extrator que não incluía
+-- essas colunas. Decisão: manter como gap documentado em vez de
+-- reprocessar/backfillar (custo não justificou para o uso atual).
 -- ===========================================================
 
 CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_hora_hora
