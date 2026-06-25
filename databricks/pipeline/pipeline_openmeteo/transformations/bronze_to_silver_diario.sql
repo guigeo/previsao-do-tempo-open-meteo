@@ -4,7 +4,16 @@
 -- Aplica conversão de tipos, normalização
 -- ===========================================================
 
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_dia_dia
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_dia_dia (
+  CONSTRAINT valid_codigo_ibge EXPECT (codigo_ibge IS NOT NULL) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_coordenadas EXPECT (latitude BETWEEN -34 AND 6 AND longitude BETWEEN -75 AND -28) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_precipitacao EXPECT (precipitacao_total_mm IS NULL OR precipitacao_total_mm >= 0) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_chuva EXPECT (chuva_mm IS NULL OR chuva_mm >= 0) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_neve EXPECT (neve_mm IS NULL OR neve_mm >= 0) ON VIOLATION DROP ROW,
+  CONSTRAINT plausivel_temp_max EXPECT (temp_max_c IS NULL OR temp_max_c BETWEEN -15 AND 50),
+  CONSTRAINT plausivel_temp_min EXPECT (temp_min_c IS NULL OR temp_min_c BETWEEN -15 AND 50),
+  CONSTRAINT plausivel_vento_direcao EXPECT (vento_direcao_dominante_graus IS NULL OR vento_direcao_dominante_graus BETWEEN 0 AND 360)
+)
 COMMENT "Silver — Clima diário limpo, tipado, deduplicado e pronto para analytics"
 TBLPROPERTIES ("quality" = "silver")
 PARTITIONED BY (ano,mes)
@@ -83,17 +92,17 @@ SELECT
     latitude,
     longitude,
 
-    COALESCE(temp_max_c, 0) AS temp_max_c,
-    COALESCE(temp_min_c, 0) AS temp_min_c,
-    COALESCE(sensacao_termica_max_c, 0) AS sensacao_termica_max_c,
-    COALESCE(sensacao_termica_min_c, 0) AS sensacao_termica_min_c,
-    COALESCE(precipitacao_total_mm, 0) AS precipitacao_total_mm,
-    COALESCE(chuva_mm, 0) AS chuva_mm,
-    COALESCE(neve_mm, 0) AS neve_mm,
-    COALESCE(vento_velocidade_max_kmh, 0) AS vento_velocidade_max_kmh,
-    COALESCE(rajadas_vento_max_kmh, 0) AS rajadas_vento_max_kmh,
-    COALESCE(vento_direcao_dominante_graus, 0) AS vento_direcao_dominante_graus,
-    COALESCE(radiacao_solar_mj_m2, 0) AS radiacao_solar_mj_m2,
+    temp_max_c,
+    temp_min_c,
+    sensacao_termica_max_c,
+    sensacao_termica_min_c,
+    precipitacao_total_mm,
+    chuva_mm,
+    neve_mm,
+    vento_velocidade_max_kmh,
+    rajadas_vento_max_kmh,
+    vento_direcao_dominante_graus,
+    radiacao_solar_mj_m2,
 
     codigo_tempo_wmo,
     ano,

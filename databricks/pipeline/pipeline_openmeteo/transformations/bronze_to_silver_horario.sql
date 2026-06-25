@@ -10,7 +10,14 @@
 -- reprocessar/backfillar (custo não justificou para o uso atual).
 -- ===========================================================
 
-CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_hora_hora
+CREATE OR REFRESH STREAMING LIVE TABLE open_meteo.silver.clima_hora_hora (
+  CONSTRAINT codigo_ibge_presente EXPECT (codigo_ibge IS NOT NULL),
+  CONSTRAINT valid_coordenadas EXPECT (latitude BETWEEN -34 AND 6 AND longitude BETWEEN -75 AND -28) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_umidade EXPECT (umidade_relativa IS NULL OR umidade_relativa BETWEEN 0 AND 100) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_vento EXPECT (velocidade_vento_ms IS NULL OR velocidade_vento_ms >= 0) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_precipitacao EXPECT (precipitacao_mm IS NULL OR precipitacao_mm >= 0) ON VIOLATION DROP ROW,
+  CONSTRAINT plausivel_temperatura EXPECT (temperatura_c IS NULL OR temperatura_c BETWEEN -15 AND 50)
+)
 COMMENT "Silver — Clima horário limpo, tipado, enriquecido e pronto para analytics"
 TBLPROPERTIES ("quality" = "silver")
 PARTITIONED BY (ano,mes)
@@ -83,10 +90,10 @@ SELECT
     latitude,
     longitude,
 
-    COALESCE(temperatura_c, 0) AS temperatura_c,
-    COALESCE(umidade_relativa, 0) AS umidade_relativa,
-    COALESCE(precipitacao_mm, 0) AS precipitacao_mm,
-    COALESCE(velocidade_vento_ms, 0) AS velocidade_vento_ms,
+    temperatura_c,
+    umidade_relativa,
+    precipitacao_mm,
+    velocidade_vento_ms,
 
     COALESCE(fonte, 'archive') AS fonte,
 
