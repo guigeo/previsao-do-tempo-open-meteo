@@ -1,889 +1,633 @@
 {
   "datasets": [
     {
-      "name": "7a7d46bb",
-      "displayName": "temp_max_muns_top10",
+      "name": "kpis",
+      "displayName": "kpis",
       "queryLines": [
-        "SELECT * FROM open_meteo.gold.temp_max_muns_top10"
-      ],
-      "catalog": "open_meteo",
-      "schema": "gold"
-    },
-    {
-      "name": "a4575982",
-      "displayName": "temp_mins_muns_top10",
-      "queryLines": [
-        "SELECT * FROM open_meteo.gold.temp_mins_muns_top10"
-      ],
-      "catalog": "open_meteo",
-      "schema": "gold"
-    },
-    {
-      "name": "d418fb36",
-      "displayName": "temp_max_dias_top10",
-      "queryLines": [
-        "SELECT * FROM open_meteo.gold.temp_max_dias_top10"
+        "SELECT COUNT(DISTINCT codigo_ibge) AS municipios, COUNT(DISTINCT uf) AS ufs, ROUND(AVG((temp_max_c+temp_min_c)/2),1) AS temp_media_nacional, ROUND(AVG(teve_chuva),3) AS pct_dias_com_chuva, ROUND(AVG(amplitude_termica_c),1) AS amplitude_media FROM open_meteo.gold.clima_dia_historico"
       ]
     },
     {
-      "name": "6e1b49e3",
-      "displayName": "temp_mins_dias_top10",
+      "name": "mapa",
+      "displayName": "mapa",
       "queryLines": [
-        "SELECT * FROM open_meteo.gold.temp_mins_dias_top10"
+        "SELECT municipio, uf, latitude, longitude, ROUND(AVG((temp_max_c+temp_min_c)/2),1) AS temp_media, ROUND(AVG(precipitacao_total_mm),1) AS chuva_media FROM open_meteo.gold.clima_dia_historico GROUP BY municipio, uf, latitude, longitude"
       ]
     },
     {
-      "name": "ce649dc1",
-      "displayName": "controle_carga",
+      "name": "classif_temp",
+      "displayName": "classif_temp",
       "queryLines": [
-        "SELECT \r\n",
-        "  metric as metricas,\r\n",
-        "  value as valor\r\n",
-        "FROM (\r\n",
-        "  SELECT \r\n",
-        "    CAST(min(data) AS STRING) as inicio_carga,\r\n",
-        "    CAST(max(data) AS STRING) as carga_atual,\r\n",
-        "    CAST(count(data) AS STRING) as tt_dias_processados\r\n",
-        "  FROM (\r\n",
-        "    SELECT data FROM open_meteo.silver.clima_dia_dia GROUP BY data\r\n",
-        "  )\r\n",
-        ") \r\n",
-        "LATERAL VIEW stack(\r\n",
-        "  3, \r\n",
-        "  'Início da Carga', inicio_carga, \r\n",
-        "  'Data Atual', carga_atual, \r\n",
-        "  'Total de dias Processados', tt_dias_processados\r\n",
-        ") as metric, value"
+        "SELECT classificacao_temperatura AS categoria, COUNT(*) AS qtd FROM open_meteo.gold.clima_dia_historico GROUP BY classificacao_temperatura"
       ]
     },
     {
-      "name": "2f945cba",
-      "displayName": "media_temp_chuva_muns",
+      "name": "classif_chuva",
+      "displayName": "classif_chuva",
       "queryLines": [
-        "SELECT * FROM open_meteo.gold.media_temp_chuva_muns"
+        "SELECT classificacao_chuva AS categoria, COUNT(*) AS qtd FROM open_meteo.gold.clima_dia_historico GROUP BY classificacao_chuva"
+      ]
+    },
+    {
+      "name": "recordes",
+      "displayName": "recordes",
+      "queryLines": [
+        "SELECT tipo_extremo, municipio, uf, CAST(data AS STRING) AS data, ROUND(valor,1) AS valor FROM (SELECT tipo_extremo, municipio, uf, data, valor, ROW_NUMBER() OVER (PARTITION BY tipo_extremo ORDER BY valor * (CASE WHEN tipo_extremo='temp_min_menor' THEN 1 ELSE -1 END)) AS rn FROM open_meteo.gold.clima_extremo) WHERE rn = 1 ORDER BY tipo_extremo"
+      ]
+    },
+    {
+      "name": "extremo_full",
+      "displayName": "extremo_full",
+      "queryLines": [
+        "SELECT CAST(data AS STRING) AS data, tipo_extremo, municipio, uf, ROUND(valor,1) AS valor FROM open_meteo.gold.clima_extremo ORDER BY data DESC, tipo_extremo"
+      ]
+    },
+    {
+      "name": "extremo_ranking",
+      "displayName": "extremo_ranking",
+      "queryLines": [
+        "SELECT concat(municipio,' - ',uf) AS mun_uf, COUNT(*) AS recordes FROM open_meteo.gold.clima_extremo GROUP BY municipio, uf ORDER BY recordes DESC LIMIT 12"
+      ]
+    },
+    {
+      "name": "tendencia",
+      "displayName": "tendencia",
+      "queryLines": [
+        "SELECT data, concat(municipio,' - ',uf) AS mun_uf, uf, ROUND((temp_max_c+temp_min_c)/2,1) AS temp_media, ROUND(media_movel_7d_temp,1) AS mm7, ROUND(media_movel_30d_temp,1) AS mm30, ROUND(anomalia_temp,1) AS anomalia_temp, ROUND(chuva_7d,1) AS chuva_7d FROM open_meteo.gold.clima_tendencia"
+      ]
+    },
+    {
+      "name": "serie_nacional",
+      "displayName": "serie_nacional",
+      "queryLines": [
+        "SELECT data, ROUND(AVG((temp_max_c+temp_min_c)/2),1) AS temp_media, ROUND(AVG(temp_max_c),1) AS temp_max, ROUND(AVG(temp_min_c),1) AS temp_min FROM open_meteo.gold.clima_dia_historico GROUP BY data"
+      ]
+    },
+    {
+      "name": "perfil_hora",
+      "displayName": "perfil_hora",
+      "queryLines": [
+        "SELECT hora, ROUND(AVG(temperatura_c),1) AS temp_media, ROUND(AVG(umidade_relativa),0) AS umidade_media FROM open_meteo.gold.clima_hora_analitico GROUP BY hora"
+      ]
+    },
+    {
+      "name": "periodo",
+      "displayName": "periodo",
+      "queryLines": [
+        "SELECT periodo_dia, ROUND(AVG(temperatura_c),1) AS temp_media, ROUND(SUM(teve_chuva)/COUNT(*),3) AS pct_chuva FROM open_meteo.gold.clima_hora_analitico GROUP BY periodo_dia"
+      ]
+    },
+    {
+      "name": "ranking_quentes",
+      "displayName": "ranking_quentes",
+      "queryLines": [
+        "SELECT concat(municipio,' - ',uf) AS mun_uf, ROUND(MAX(temp_max_c),1) AS temp_max FROM open_meteo.gold.clima_dia_historico GROUP BY municipio, uf ORDER BY temp_max DESC LIMIT 10"
+      ]
+    },
+    {
+      "name": "ranking_frios",
+      "displayName": "ranking_frios",
+      "queryLines": [
+        "SELECT concat(municipio,' - ',uf) AS mun_uf, ROUND(MIN(temp_min_c),1) AS temp_min FROM open_meteo.gold.clima_dia_historico GROUP BY municipio, uf ORDER BY temp_min ASC LIMIT 10"
+      ]
+    },
+    {
+      "name": "uf_agg",
+      "displayName": "uf_agg",
+      "queryLines": [
+        "SELECT uf, ROUND(AVG((temp_max_c+temp_min_c)/2),1) AS temp_media, ROUND(AVG(precipitacao_total_mm),1) AS chuva_media FROM open_meteo.gold.clima_dia_historico GROUP BY uf"
+      ]
+    },
+    {
+      "name": "carga",
+      "displayName": "carga",
+      "queryLines": [
+        "SELECT CAST(MIN(data) AS STRING) AS data_min, CAST(MAX(data) AS STRING) AS data_max, COUNT(DISTINCT data) AS dias_processados, COUNT(DISTINCT codigo_ibge) AS municipios, DATEDIFF(CURRENT_DATE(), MAX(data)) AS dias_desde_ultima FROM open_meteo.gold.clima_dia_historico"
       ]
     }
   ],
   "pages": [
     {
-      "name": "c5deb693",
-      "displayName": "Cidades",
+      "name": "visao_geral",
+      "displayName": "Visão Geral",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
       "layout": [
         {
           "widget": {
-            "name": "e24c2882",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "7a7d46bb",
-                  "fields": [
-                    {
-                      "name": "sum(temp_max_c)",
-                      "expression": "SUM(`temp_max_c`)"
-                    },
-                    {
-                      "name": "mun_uf",
-                      "expression": "`mun_uf`"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "version": 3,
-              "widgetType": "bar",
-              "encodings": {
-                "x": {
-                  "fieldName": "sum(temp_max_c)",
-                  "axis": {
-                    "title": "Temperatura",
-                    "labelAngle": 45
-                  },
-                  "scale": {
-                    "type": "quantitative"
-                  }
-                },
-                "y": {
-                  "fieldName": "mun_uf",
-                  "axis": {
-                    "title": "Municípios"
-                  },
-                  "scale": {
-                    "type": "categorical",
-                    "sort": {
-                      "by": "x-reversed"
-                    }
-                  }
-                },
-                "label": {
-                  "show": true
-                }
-              },
-              "frame": {
-                "showTitle": true,
-                "title": "Top 10 Municípios Máximas Temperaturas\n"
-              },
-              "mark": {
-                "colors": [
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 3
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 6
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 8
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  }
-                ]
-              }
-            }
+            "name": "vg_title",
+            "multilineTextboxSpec": { "lines": ["## ☀️ Clima Brasil · Open-Meteo"] }
           },
-          "position": {
-            "x": 0,
-            "y": 0,
-            "width": 3,
-            "height": 6
-          }
+          "position": { "x": 0, "y": 0, "width": 12, "height": 1 }
         },
         {
           "widget": {
-            "name": "4e94379c",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "a4575982",
-                  "fields": [
-                    {
-                      "name": "sum(temp_min_c)",
-                      "expression": "SUM(`temp_min_c`)"
-                    },
-                    {
-                      "name": "mun_uf",
-                      "expression": "`mun_uf`"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "version": 3,
-              "widgetType": "bar",
-              "encodings": {
-                "x": {
-                  "fieldName": "sum(temp_min_c)",
-                  "axis": {
-                    "title": "Temperatura"
-                  },
-                  "scale": {
-                    "type": "quantitative"
-                  }
-                },
-                "y": {
-                  "fieldName": "mun_uf",
-                  "axis": {
-                    "title": "Municípios"
-                  },
-                  "scale": {
-                    "type": "categorical",
-                    "sort": {
-                      "by": "x"
-                    }
-                  }
-                },
-                "label": {
-                  "show": true
-                }
-              },
-              "frame": {
-                "showTitle": true,
-                "title": "Top 10 Municípios Minímas Temperaturas"
-              },
-              "mark": {
-                "colors": [
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 2
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 3
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 6
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 8
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  }
-                ]
-              }
-            }
+            "name": "vg_subtitle",
+            "multilineTextboxSpec": { "lines": ["Panorama climático diário (D-1) dos municípios brasileiros · catálogo open_meteo (Gold)"] }
           },
-          "position": {
-            "x": 3,
-            "y": 0,
-            "width": 3,
-            "height": 6
-          }
-        }
-      ],
-      "pageType": "PAGE_TYPE_CANVAS"
-    },
-    {
-      "name": "a9ffb559",
-      "displayName": "Dias",
-      "layout": [
-        {
-          "widget": {
-            "name": "a6d9dde3",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "d418fb36",
-                  "fields": [
-                    {
-                      "name": "sum(temp_max_c)",
-                      "expression": "SUM(`temp_max_c`)"
-                    },
-                    {
-                      "name": "daily(data)",
-                      "expression": "DATE_TRUNC(\"DAY\", `data`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "version": 3,
-              "widgetType": "bar",
-              "encodings": {
-                "x": {
-                  "fieldName": "sum(temp_max_c)",
-                  "axis": {
-                    "labelAngle": 45,
-                    "title": "Temperatura"
-                  },
-                  "format": {
-                    "type": "number-plain",
-                    "abbreviation": "compact",
-                    "decimalPlaces": {
-                      "type": "all"
-                    },
-                    "hideGroupSeparator": false
-                  },
-                  "scale": {
-                    "type": "quantitative"
-                  }
-                },
-                "y": {
-                  "fieldName": "daily(data)",
-                  "displayName": "Dia",
-                  "scale": {
-                    "type": "categorical",
-                    "sort": {
-                      "by": "x-reversed"
-                    }
-                  }
-                },
-                "label": {
-                  "show": true
-                }
-              },
-              "frame": {
-                "showTitle": true,
-                "title": "Top 10 Dias Máximas Temperaturas"
-              }
-            }
-          },
-          "position": {
-            "x": 0,
-            "y": 0,
-            "width": 3,
-            "height": 6
-          }
+          "position": { "x": 0, "y": 1, "width": 12, "height": 1 }
         },
         {
           "widget": {
-            "name": "bc00e533",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "6e1b49e3",
-                  "fields": [
-                    {
-                      "name": "sum(temp_min_c)",
-                      "expression": "SUM(`temp_min_c`)"
-                    },
-                    {
-                      "name": "daily(data)",
-                      "expression": "DATE_TRUNC(\"DAY\", `data`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
+            "name": "kpi_municipios",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "kpis", "fields": [ { "name": "municipios", "expression": "`municipios`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "municipios", "displayName": "Municípios" } },
+              "frame": { "showTitle": true, "title": "Municípios monitorados" }
+            }
+          },
+          "position": { "x": 0, "y": 2, "width": 3, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "kpi_temp_media",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "kpis", "fields": [ { "name": "temp_media_nacional", "expression": "`temp_media_nacional`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "temp_media_nacional", "displayName": "Temp. média (°C)", "format": { "type": "number", "decimalPlaces": { "type": "fixed", "places": 1 } } } },
+              "frame": { "showTitle": true, "title": "Temperatura média nacional" }
+            }
+          },
+          "position": { "x": 3, "y": 2, "width": 3, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "kpi_pct_chuva",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "kpis", "fields": [ { "name": "pct_dias_com_chuva", "expression": "`pct_dias_com_chuva`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "pct_dias_com_chuva", "displayName": "% dias com chuva", "format": { "type": "number-percent", "decimalPlaces": { "type": "fixed", "places": 1 } } } },
+              "frame": { "showTitle": true, "title": "Dias com chuva" }
+            }
+          },
+          "position": { "x": 6, "y": 2, "width": 3, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "kpi_amplitude",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "kpis", "fields": [ { "name": "amplitude_media", "expression": "`amplitude_media`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "amplitude_media", "displayName": "Amplitude térmica (°C)", "format": { "type": "number", "decimalPlaces": { "type": "fixed", "places": 1 } } } },
+              "frame": { "showTitle": true, "title": "Amplitude térmica média" }
+            }
+          },
+          "position": { "x": 9, "y": 2, "width": 3, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "vg_header_mapa",
+            "multilineTextboxSpec": { "lines": ["### 🗺️ Mapa térmico (longitude × latitude) e distribuições"] }
+          },
+          "position": { "x": 0, "y": 5, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "vg_mapa",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "mapa", "fields": [ { "name": "longitude", "expression": "`longitude`" }, { "name": "latitude", "expression": "`latitude`" }, { "name": "temp_media", "expression": "`temp_media`" }, { "name": "chuva_media", "expression": "`chuva_media`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": { "fieldName": "longitude", "scale": { "type": "quantitative" }, "axis": { "title": "Longitude" } },
+                "y": { "fieldName": "latitude", "scale": { "type": "quantitative" }, "axis": { "title": "Latitude" } },
+                "color": { "fieldName": "temp_media", "scale": { "type": "quantitative" }, "legend": { "title": "Temp. média °C" } },
+                "size": { "fieldName": "chuva_media", "scale": { "type": "quantitative" } }
+              },
+              "frame": { "showTitle": true, "title": "Municípios por temperatura média (contorno do Brasil)" }
+            }
+          },
+          "position": { "x": 0, "y": 6, "width": 8, "height": 7 }
+        },
+        {
+          "widget": {
+            "name": "vg_pie_temp",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "classif_temp", "fields": [ { "name": "sum(qtd)", "expression": "SUM(`qtd`)" }, { "name": "categoria", "expression": "`categoria`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": { "fieldName": "sum(qtd)", "scale": { "type": "quantitative" } },
+                "color": { "fieldName": "categoria", "scale": { "type": "categorical" } }
+              },
+              "frame": { "showTitle": true, "title": "Classificação de temperatura" }
+            }
+          },
+          "position": { "x": 8, "y": 6, "width": 4, "height": 4 }
+        },
+        {
+          "widget": {
+            "name": "vg_pie_chuva",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "classif_chuva", "fields": [ { "name": "sum(qtd)", "expression": "SUM(`qtd`)" }, { "name": "categoria", "expression": "`categoria`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": { "fieldName": "sum(qtd)", "scale": { "type": "quantitative" } },
+                "color": { "fieldName": "categoria", "scale": { "type": "categorical" } }
+              },
+              "frame": { "showTitle": true, "title": "Classificação de chuva" }
+            }
+          },
+          "position": { "x": 8, "y": 10, "width": 4, "height": 3 }
+        }
+      ]
+    },
+    {
+      "name": "extremos",
+      "displayName": "Extremos & Recordes",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "ex_title",
+            "multilineTextboxSpec": { "lines": ["## 🏆 Extremos & Recordes do período"] }
+          },
+          "position": { "x": 0, "y": 0, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "ex_subtitle",
+            "multilineTextboxSpec": { "lines": ["Maiores registros de temperatura, chuva, vento, rajada e radiação — e a cidade que registrou"] }
+          },
+          "position": { "x": 0, "y": 1, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "ex_recordes",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "recordes", "fields": [ { "name": "tipo_extremo", "expression": "`tipo_extremo`" }, { "name": "municipio", "expression": "`municipio`" }, { "name": "uf", "expression": "`uf`" }, { "name": "data", "expression": "`data`" }, { "name": "valor", "expression": "`valor`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": { "columns": [ { "fieldName": "tipo_extremo", "displayName": "Tipo de extremo" }, { "fieldName": "municipio", "displayName": "Município" }, { "fieldName": "uf", "displayName": "UF" }, { "fieldName": "data", "displayName": "Data" }, { "fieldName": "valor", "displayName": "Valor" } ] },
+              "frame": { "showTitle": true, "title": "Recordes absolutos por tipo" }
+            }
+          },
+          "position": { "x": 0, "y": 2, "width": 12, "height": 4 }
+        },
+        {
+          "widget": {
+            "name": "ex_header_rank",
+            "multilineTextboxSpec": { "lines": ["### 📍 Municípios que mais aparecem nos extremos diários"] }
+          },
+          "position": { "x": 0, "y": 6, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "ex_ranking",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "extremo_ranking", "fields": [ { "name": "sum(recordes)", "expression": "SUM(`recordes`)" }, { "name": "mun_uf", "expression": "`mun_uf`" } ], "disaggregated": false } } ],
             "spec": {
               "version": 3,
               "widgetType": "bar",
               "encodings": {
-                "x": {
-                  "fieldName": "sum(temp_min_c)",
-                  "axis": {
-                    "title": "Temperatura"
-                  },
-                  "scale": {
-                    "type": "quantitative"
-                  }
-                },
-                "y": {
-                  "fieldName": "daily(data)",
-                  "displayName": "Dia",
-                  "scale": {
-                    "type": "categorical",
-                    "sort": {
-                      "by": "x"
-                    }
-                  }
-                },
-                "label": {
-                  "show": true
-                }
+                "x": { "fieldName": "sum(recordes)", "scale": { "type": "quantitative" }, "axis": { "title": "Nº de recordes diários" } },
+                "y": { "fieldName": "mun_uf", "scale": { "type": "categorical", "sort": { "by": "x-reversed" } }, "axis": { "title": "Município" } },
+                "label": { "show": true }
               },
-              "frame": {
-                "showTitle": true,
-                "title": "Top 10 Dias Minímas Temperaturas"
-              },
-              "mark": {
-                "colors": [
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 2
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 3
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 6
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 8
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  }
-                ]
-              }
+              "frame": { "showTitle": true, "title": "Top 12 municípios por nº de extremos" }
             }
           },
-          "position": {
-            "x": 3,
-            "y": 0,
-            "width": 3,
-            "height": 6
-          }
+          "position": { "x": 0, "y": 7, "width": 12, "height": 5 }
+        },
+        {
+          "widget": {
+            "name": "ex_header_full",
+            "multilineTextboxSpec": { "lines": ["### 📅 Extremos dia a dia"] }
+          },
+          "position": { "x": 0, "y": 12, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "ex_full",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "extremo_full", "fields": [ { "name": "data", "expression": "`data`" }, { "name": "tipo_extremo", "expression": "`tipo_extremo`" }, { "name": "municipio", "expression": "`municipio`" }, { "name": "uf", "expression": "`uf`" }, { "name": "valor", "expression": "`valor`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": { "columns": [ { "fieldName": "data", "displayName": "Data" }, { "fieldName": "tipo_extremo", "displayName": "Tipo" }, { "fieldName": "municipio", "displayName": "Município" }, { "fieldName": "uf", "displayName": "UF" }, { "fieldName": "valor", "displayName": "Valor" } ] },
+              "frame": { "showTitle": true, "title": "Extremos por dia (mais recentes primeiro)" }
+            }
+          },
+          "position": { "x": 0, "y": 13, "width": 12, "height": 6 }
         }
-      ],
-      "pageType": "PAGE_TYPE_CANVAS"
+      ]
     },
     {
-      "name": "7f398620",
-      "displayName": "Médias",
+      "name": "tendencias",
+      "displayName": "Tendências & Anomalias",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
       "layout": [
         {
           "widget": {
-            "name": "6b4aec06",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "2f945cba",
-                  "fields": [
-                    {
-                      "name": "sum(media_chuva_mm)",
-                      "expression": "SUM(`media_chuva_mm`)"
-                    },
-                    {
-                      "name": "mun_uf",
-                      "expression": "`mun_uf`"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
+            "name": "td_title",
+            "multilineTextboxSpec": { "lines": ["## 📈 Tendências & Anomalias"] }
+          },
+          "position": { "x": 0, "y": 0, "width": 8, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "td_filtro",
+            "queries": [ { "name": "tend_munuf", "query": { "datasetName": "tendencia", "fields": [ { "name": "mun_uf", "expression": "`mun_uf`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": { "fields": [ { "fieldName": "mun_uf", "displayName": "Município", "queryName": "tend_munuf" } ] },
+              "frame": { "showTitle": true, "title": "Município (filtra os gráficos abaixo)" }
+            }
+          },
+          "position": { "x": 8, "y": 0, "width": 4, "height": 2 }
+        },
+        {
+          "widget": {
+            "name": "td_subtitle",
+            "multilineTextboxSpec": { "lines": ["Sem filtro = média nacional · selecione um município para ver a série local"] }
+          },
+          "position": { "x": 0, "y": 1, "width": 8, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "td_nacional",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "serie_nacional", "fields": [ { "name": "data", "expression": "`data`" }, { "name": "temp_media", "expression": "`temp_media`" }, { "name": "temp_max", "expression": "`temp_max`" }, { "name": "temp_min", "expression": "`temp_min`" } ], "disaggregated": true } } ],
             "spec": {
               "version": 3,
               "widgetType": "line",
               "encodings": {
-                "x": {
-                  "fieldName": "mun_uf",
-                  "axis": {
-                    "title": "Cidades",
-                    "hideTitle": true
-                  },
-                  "scale": {
-                    "type": "categorical",
-                    "sort": {
-                      "by": "natural-order"
-                    }
-                  }
-                },
-                "y": {
-                  "fieldName": "sum(media_chuva_mm)",
-                  "axis": {
-                    "hideTitle": true,
-                    "hideLabels": false,
-                    "hideGrid": false
-                  },
-                  "scale": {
-                    "type": "quantitative",
-                    "fn": {
-                      "type": "symlog"
-                    }
-                  }
-                },
-                "label": {
-                  "show": true,
-                  "text": {
-                    "fieldName": "sum(media_chuva_mm)"
-                  }
-                }
+                "x": { "fieldName": "data", "scale": { "type": "temporal" }, "axis": { "title": "Data" } },
+                "y": { "scale": { "type": "quantitative" }, "fields": [ { "fieldName": "temp_media", "displayName": "Média" }, { "fieldName": "temp_max", "displayName": "Máxima" }, { "fieldName": "temp_min", "displayName": "Mínima" } ], "axis": { "title": "Temperatura (°C)" } }
               },
-              "frame": {
-                "showTitle": true,
-                "title": "Média de precipitação",
-                "showDescription": true,
-                "description": "*em milímetros"
-              },
-              "mark": {
-                "colors": [
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 2
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 3
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 6
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 8
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  }
-                ]
-              }
+              "frame": { "showTitle": true, "title": "Temperatura média nacional por dia" }
             }
           },
-          "position": {
-            "x": 0,
-            "y": 1,
-            "width": 6,
-            "height": 6
-          }
+          "position": { "x": 0, "y": 2, "width": 12, "height": 6 }
         },
         {
           "widget": {
-            "name": "2bb90fb7",
-            "queries": [
-              {
-                "name": "dashboards/01f0d2244bb21fa6ac5db23b5c2c3b91/datasets/01f0d54921b914c6978750cbea1cf3ee_uf",
-                "query": {
-                  "datasetName": "2f945cba",
-                  "fields": [
-                    {
-                      "name": "uf",
-                      "expression": "`uf`"
-                    },
-                    {
-                      "name": "uf_associativity",
-                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
+            "name": "td_header_cidade",
+            "multilineTextboxSpec": { "lines": ["### 🏙️ Série da seleção · média móvel 7d/30d"] }
+          },
+          "position": { "x": 0, "y": 8, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "td_mm",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "tendencia", "fields": [ { "name": "daily(data)", "expression": "DATE_TRUNC(\"DAY\", `data`)" }, { "name": "avg(temp_media)", "expression": "AVG(`temp_media`)" }, { "name": "avg(mm7)", "expression": "AVG(`mm7`)" }, { "name": "avg(mm30)", "expression": "AVG(`mm30`)" } ], "disaggregated": false } } ],
             "spec": {
-              "version": 2,
-              "widgetType": "filter-single-select",
+              "version": 3,
+              "widgetType": "line",
               "encodings": {
-                "fields": [
-                  {
-                    "fieldName": "uf",
-                    "queryName": "dashboards/01f0d2244bb21fa6ac5db23b5c2c3b91/datasets/01f0d54921b914c6978750cbea1cf3ee_uf"
-                  }
-                ]
+                "x": { "fieldName": "daily(data)", "scale": { "type": "temporal" }, "axis": { "title": "Data" } },
+                "y": { "scale": { "type": "quantitative" }, "fields": [ { "fieldName": "avg(temp_media)", "displayName": "Temp. média" }, { "fieldName": "avg(mm7)", "displayName": "Média móvel 7d" }, { "fieldName": "avg(mm30)", "displayName": "Média móvel 30d" } ], "axis": { "title": "Temperatura (°C)" } }
               },
-              "disallowAll": true,
-              "frame": {
-                "showTitle": true,
-                "title": "Filtro UF"
-              }
+              "frame": { "showTitle": true, "title": "Temperatura e médias móveis" }
             }
           },
-          "position": {
-            "x": 0,
-            "y": 0,
-            "width": 2,
-            "height": 1
-          }
+          "position": { "x": 0, "y": 9, "width": 12, "height": 6 }
         },
         {
           "widget": {
-            "name": "2a698d2c",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "2f945cba",
-                  "fields": [
-                    {
-                      "name": "sum(media_temperatura)",
-                      "expression": "SUM(`media_temperatura`)"
-                    },
-                    {
-                      "name": "mun_uf",
-                      "expression": "`mun_uf`"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
+            "name": "td_anomalia",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "tendencia", "fields": [ { "name": "daily(data)", "expression": "DATE_TRUNC(\"DAY\", `data`)" }, { "name": "avg(anomalia_temp)", "expression": "AVG(`anomalia_temp`)" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": { "fieldName": "daily(data)", "scale": { "type": "temporal" }, "axis": { "title": "Data" } },
+                "y": { "fieldName": "avg(anomalia_temp)", "scale": { "type": "quantitative" }, "axis": { "title": "Anomalia (°C)" } }
+              },
+              "frame": { "showTitle": true, "title": "Anomalia térmica (desvio vs média 30d)" }
+            }
+          },
+          "position": { "x": 0, "y": 15, "width": 6, "height": 6 }
+        },
+        {
+          "widget": {
+            "name": "td_chuva",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "tendencia", "fields": [ { "name": "daily(data)", "expression": "DATE_TRUNC(\"DAY\", `data`)" }, { "name": "avg(chuva_7d)", "expression": "AVG(`chuva_7d`)" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": { "fieldName": "daily(data)", "scale": { "type": "temporal" }, "axis": { "title": "Data" } },
+                "y": { "scale": { "type": "quantitative" }, "fields": [ { "fieldName": "avg(chuva_7d)", "displayName": "Chuva acum. 7d (mm)" } ], "axis": { "title": "Chuva 7d (mm)" } }
+              },
+              "frame": { "showTitle": true, "title": "Chuva acumulada (7 dias)" }
+            }
+          },
+          "position": { "x": 6, "y": 15, "width": 6, "height": 6 }
+        }
+      ]
+    },
+    {
+      "name": "horario_rankings",
+      "displayName": "Horário · Rankings · Carga",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "hr_title",
+            "multilineTextboxSpec": { "lines": ["## 🕐 Perfil horário, rankings e controle de carga"] }
+          },
+          "position": { "x": 0, "y": 0, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "hr_header_hora",
+            "multilineTextboxSpec": { "lines": ["### Perfil horário nacional"] }
+          },
+          "position": { "x": 0, "y": 1, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "hr_perfil_hora",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "perfil_hora", "fields": [ { "name": "hora", "expression": "`hora`" }, { "name": "temp_media", "expression": "`temp_media`" }, { "name": "umidade_media", "expression": "`umidade_media`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": { "fieldName": "hora", "scale": { "type": "quantitative" }, "axis": { "title": "Hora do dia" } },
+                "y": { "scale": { "type": "quantitative" }, "fields": [ { "fieldName": "temp_media", "displayName": "Temp. média (°C)" }, { "fieldName": "umidade_media", "displayName": "Umidade (%)" } ] }
+              },
+              "frame": { "showTitle": true, "title": "Temperatura e umidade por hora" }
+            }
+          },
+          "position": { "x": 0, "y": 2, "width": 6, "height": 6 }
+        },
+        {
+          "widget": {
+            "name": "hr_periodo",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "periodo", "fields": [ { "name": "periodo_dia", "expression": "`periodo_dia`" }, { "name": "sum(temp_media)", "expression": "SUM(`temp_media`)" }, { "name": "sum(pct_chuva)", "expression": "SUM(`pct_chuva`)" } ], "disaggregated": false } } ],
             "spec": {
               "version": 1,
               "widgetType": "combo",
               "encodings": {
-                "x": {
-                  "fieldName": "mun_uf",
-                  "axis": {
-                    "hideLabels": false,
-                    "hideTitle": true
-                  },
-                  "scale": {
-                    "type": "categorical"
-                  }
-                },
-                "label": {
-                  "show": true,
-                  "text": {
-                    "fieldName": "sum(media_temperatura)",
-                    "displayName": "*"
-                  }
-                },
-                "color": {
-                  "legend": {
-                    "hide": true
-                  }
-                },
-                "y": {
-                  "primary": {
-                    "fields": [
-                      {
-                        "fieldName": "sum(media_temperatura)"
-                      }
-                    ]
-                  },
-                  "secondary": {
-                    "fields": []
-                  },
-                  "scale": {
-                    "type": "quantitative",
-                    "fn": {
-                      "type": "symlog"
-                    }
-                  },
-                  "axis": {
-                    "hideTitle": true,
-                    "hideLabels": false,
-                    "hideGrid": false
-                  }
-                }
+                "x": { "fieldName": "periodo_dia", "scale": { "type": "categorical" }, "axis": { "title": "Período do dia" } },
+                "y": { "scale": { "type": "quantitative" }, "primary": { "fields": [ { "fieldName": "sum(temp_media)", "displayName": "Temp. média (°C)" } ] }, "secondary": { "fields": [ { "fieldName": "sum(pct_chuva)", "displayName": "% chuva" } ] } },
+                "label": { "show": true }
               },
-              "frame": {
-                "showTitle": true,
-                "title": "Média de temperatura"
-              },
-              "mark": {
-                "colors": [
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 3
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 4
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 5
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 6
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 7
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 8
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 9
-                  },
-                  {
-                    "themeColorType": "visualizationColors",
-                    "position": 10
-                  }
-                ]
-              }
+              "frame": { "showTitle": true, "title": "Temperatura e chuva por período do dia" }
             }
           },
-          "position": {
-            "x": 0,
-            "y": 7,
-            "width": 6,
-            "height": 6
-          }
+          "position": { "x": 6, "y": 2, "width": 6, "height": 6 }
+        },
+        {
+          "widget": {
+            "name": "hr_header_rank",
+            "multilineTextboxSpec": { "lines": ["### Rankings de municípios"] }
+          },
+          "position": { "x": 0, "y": 8, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "hr_quentes",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "ranking_quentes", "fields": [ { "name": "sum(temp_max)", "expression": "SUM(`temp_max`)" }, { "name": "mun_uf", "expression": "`mun_uf`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": { "fieldName": "sum(temp_max)", "scale": { "type": "quantitative" }, "axis": { "title": "Temp. máxima (°C)" } },
+                "y": { "fieldName": "mun_uf", "scale": { "type": "categorical", "sort": { "by": "x-reversed" } }, "axis": { "title": "Município" } },
+                "label": { "show": true }
+              },
+              "frame": { "showTitle": true, "title": "Top 10 mais quentes (máxima absoluta)" }
+            }
+          },
+          "position": { "x": 0, "y": 9, "width": 6, "height": 6 }
+        },
+        {
+          "widget": {
+            "name": "hr_frios",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "ranking_frios", "fields": [ { "name": "sum(temp_min)", "expression": "SUM(`temp_min`)" }, { "name": "mun_uf", "expression": "`mun_uf`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": { "fieldName": "sum(temp_min)", "scale": { "type": "quantitative" }, "axis": { "title": "Temp. mínima (°C)" } },
+                "y": { "fieldName": "mun_uf", "scale": { "type": "categorical", "sort": { "by": "x" } }, "axis": { "title": "Município" } },
+                "label": { "show": true }
+              },
+              "frame": { "showTitle": true, "title": "Top 10 mais frios (mínima absoluta)" }
+            }
+          },
+          "position": { "x": 6, "y": 9, "width": 6, "height": 6 }
+        },
+        {
+          "widget": {
+            "name": "hr_uf",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "uf_agg", "fields": [ { "name": "sum(temp_media)", "expression": "SUM(`temp_media`)" }, { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } } ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": { "fieldName": "sum(temp_media)", "scale": { "type": "quantitative" }, "axis": { "title": "Temp. média (°C)" } },
+                "y": { "fieldName": "uf", "scale": { "type": "categorical", "sort": { "by": "x-reversed" } }, "axis": { "title": "UF" } },
+                "label": { "show": true }
+              },
+              "frame": { "showTitle": true, "title": "Temperatura média por UF" }
+            }
+          },
+          "position": { "x": 0, "y": 15, "width": 12, "height": 7 }
+        },
+        {
+          "widget": {
+            "name": "hr_header_carga",
+            "multilineTextboxSpec": { "lines": ["### 🔄 Controle de carga"] }
+          },
+          "position": { "x": 0, "y": 22, "width": 12, "height": 1 }
+        },
+        {
+          "widget": {
+            "name": "hr_carga_dias",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "carga", "fields": [ { "name": "dias_processados", "expression": "`dias_processados`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "dias_processados", "displayName": "Dias processados" } },
+              "frame": { "showTitle": true, "title": "Dias processados" }
+            }
+          },
+          "position": { "x": 0, "y": 23, "width": 4, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "hr_carga_muns",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "carga", "fields": [ { "name": "municipios", "expression": "`municipios`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "municipios", "displayName": "Municípios" } },
+              "frame": { "showTitle": true, "title": "Municípios na carga" }
+            }
+          },
+          "position": { "x": 4, "y": 23, "width": 4, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "hr_carga_freshness",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "carga", "fields": [ { "name": "dias_desde_ultima", "expression": "`dias_desde_ultima`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": { "value": { "fieldName": "dias_desde_ultima", "displayName": "Dias desde última carga" } },
+              "frame": { "showTitle": true, "title": "Defasagem (dias)" }
+            }
+          },
+          "position": { "x": 8, "y": 23, "width": 4, "height": 3 }
+        },
+        {
+          "widget": {
+            "name": "hr_carga_tabela",
+            "queries": [ { "name": "main_query", "query": { "datasetName": "carga", "fields": [ { "name": "data_min", "expression": "`data_min`" }, { "name": "data_max", "expression": "`data_max`" } ], "disaggregated": true } } ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": { "columns": [ { "fieldName": "data_min", "displayName": "Início da carga" }, { "fieldName": "data_max", "displayName": "Carga mais recente" } ] },
+              "frame": { "showTitle": true, "title": "Janela de dados" }
+            }
+          },
+          "position": { "x": 0, "y": 26, "width": 12, "height": 3 }
         }
-      ],
-      "pageType": "PAGE_TYPE_CANVAS"
+      ]
     },
     {
-      "name": "577e16e8",
-      "displayName": "Controle da Carga",
+      "name": "global_filters",
+      "displayName": "Filtros Globais",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1",
       "layout": [
         {
           "widget": {
-            "name": "e6d79712",
+            "name": "gf_uf",
             "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "ce649dc1",
-                  "fields": [
-                    {
-                      "name": "metricas",
-                      "expression": "`metricas`"
-                    },
-                    {
-                      "name": "valor",
-                      "expression": "`valor`"
-                    }
-                  ],
-                  "disaggregated": true
-                }
-              }
+              { "name": "mapa_uf", "query": { "datasetName": "mapa", "fields": [ { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } },
+              { "name": "tend_uf", "query": { "datasetName": "tendencia", "fields": [ { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } },
+              { "name": "rec_uf", "query": { "datasetName": "recordes", "fields": [ { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } },
+              { "name": "exf_uf", "query": { "datasetName": "extremo_full", "fields": [ { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } },
+              { "name": "ufagg_uf", "query": { "datasetName": "uf_agg", "fields": [ { "name": "uf", "expression": "`uf`" } ], "disaggregated": false } }
             ],
             "spec": {
-              "version": 1,
-              "widgetType": "table",
-              "encodings": {
-                "columns": [
-                  {
-                    "fieldName": "metricas",
-                    "booleanValues": [
-                      "false",
-                      "true"
-                    ],
-                    "imageUrlTemplate": "{{ @ }}",
-                    "imageTitleTemplate": "{{ @ }}",
-                    "imageWidth": "",
-                    "imageHeight": "",
-                    "linkUrlTemplate": "{{ @ }}",
-                    "linkTextTemplate": "{{ @ }}",
-                    "linkTitleTemplate": "{{ @ }}",
-                    "linkOpenInNewTab": true,
-                    "type": "string",
-                    "displayAs": "string",
-                    "visible": true,
-                    "order": 100000,
-                    "title": "*",
-                    "allowSearch": false,
-                    "alignContent": "left",
-                    "allowHTML": false,
-                    "highlightLinks": false,
-                    "useMonospaceFont": false,
-                    "preserveWhitespace": false
-                  },
-                  {
-                    "fieldName": "valor",
-                    "booleanValues": [
-                      "false",
-                      "true"
-                    ],
-                    "imageUrlTemplate": "{{ @ }}",
-                    "imageTitleTemplate": "{{ @ }}",
-                    "imageWidth": "",
-                    "imageHeight": "",
-                    "linkUrlTemplate": "{{ @ }}",
-                    "linkTextTemplate": "{{ @ }}",
-                    "linkTitleTemplate": "{{ @ }}",
-                    "linkOpenInNewTab": true,
-                    "type": "string",
-                    "displayAs": "string",
-                    "visible": true,
-                    "order": 100001,
-                    "title": "*",
-                    "allowSearch": false,
-                    "alignContent": "center",
-                    "allowHTML": false,
-                    "highlightLinks": false,
-                    "useMonospaceFont": false,
-                    "preserveWhitespace": false
-                  }
-                ]
-              },
-              "invisibleColumns": [],
-              "allowHTMLByDefault": false,
-              "itemsPerPage": 25,
-              "paginationSize": "default",
-              "condensed": true,
-              "withRowNumber": false
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": { "fields": [
+                { "fieldName": "uf", "displayName": "UF", "queryName": "mapa_uf" },
+                { "fieldName": "uf", "displayName": "UF", "queryName": "tend_uf" },
+                { "fieldName": "uf", "displayName": "UF", "queryName": "rec_uf" },
+                { "fieldName": "uf", "displayName": "UF", "queryName": "exf_uf" },
+                { "fieldName": "uf", "displayName": "UF", "queryName": "ufagg_uf" }
+              ] },
+              "frame": { "showTitle": true, "title": "UF" }
             }
           },
-          "position": {
-            "x": 0,
-            "y": 0,
-            "width": 3,
-            "height": 4
-          }
+          "position": { "x": 0, "y": 0, "width": 3, "height": 2 }
         }
-      ],
-      "pageType": "PAGE_TYPE_CANVAS"
-    },
-    {
-      "name": "0cae1a6a",
-      "displayName": "Global Filters",
-      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+      ]
     }
   ],
-  "uiSettings": {
-    "theme": {
-      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
-    },
-    "applyModeEnabled": false
-  }
+  "uiSettings": { "theme": { "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED" } }
 }

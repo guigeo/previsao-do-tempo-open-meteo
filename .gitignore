@@ -73,3 +73,6 @@ docker-compose.override.yaml
 #####################################
 .DS_Store
 Thumbs.db
+
+# Databricks MCP local resource tracking
+.databricks-resources.json
