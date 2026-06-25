@@ -43,10 +43,9 @@ Pipeline **Spark Declarative Pipelines / Lakeflow (SQL)** que processa dados cli
 databricks/
 ├── README.md
 ├── dashboard/
-│   └── Dash OpenMeteo.lvdash.json     # usa só as tabelas Gold "ativas" (ver inventário)
+│   └── Dash OpenMeteo.lvdash.json     # 4 páginas, usa as Gold ricas (historico/extremo/tendencia/hora)
 └── pipeline/
     └── pipeline_openmeteo/
-        ├── gold_metricas.sql           # ⚠️ ÓRFÃO — fora do glob do pipeline, ver abaixo
         └── transformations/
             ├── raw_to_bronze_diario.sql
             ├── raw_to_bronze_horario.sql
@@ -54,7 +53,8 @@ databricks/
             ├── bronze_to_silver_horario.sql
             ├── gold_media_temp_chuva.sql
             ├── gold_min_max_temp_dias.sql
-            └── gold_min_max_temp_muns.sql
+            ├── gold_min_max_temp_muns.sql
+            └── gold_metricas.sql           # clima_dia_historico/extremo/tendencia/hora_analitico
 ```
 
 O pipeline no workspace (`pipeline_openmeteo`, id `68827b61-cedc-4f21-b1f2-1f2f26771ce1`) só inclui arquivos via glob:
@@ -63,7 +63,7 @@ O pipeline no workspace (`pipeline_openmeteo`, id `68827b61-cedc-4f21-b1f2-1f2f2
 /Repos/<usuário>/previsao-do-tempo-open-meteo/databricks/pipeline/pipeline_openmeteo/transformations/**
 ```
 
-**`gold_metricas.sql` está um nível acima de `transformations/`, então nunca entra no DAG.** As 4 tabelas que ele define (`clima_dia_historico`, `clima_extremo`, `clima_tendencia`, `clima_hora_analitico`) foram criadas manualmente uma vez (~2025-12-04) e nunca mais foram atualizadas — congeladas. Decisão tomada em 2026-06-25: não mexer agora, decidir o destino delas junto do redesign do dashboard (manter e mover pro glob, ou descontinuar).
+**Histórico:** até 2026-06-25, `gold_metricas.sql` ficava um nível acima de `transformations/`, fora do glob — então nunca entrava no DAG. As 4 tabelas que ele define (`clima_dia_historico`, `clima_extremo`, `clima_tendencia`, `clima_hora_analitico`) tinham sido criadas manualmente uma vez (~2025-12-04) e ficaram congeladas, enquanto Silver e as demais Gold seguiam atualizando. **Resolvido em 2026-06-25** movendo o arquivo para `transformations/`, dentro do glob — as 4 tabelas voltaram a fazer parte do pipeline e são reprocessadas a cada run. Após mover, é preciso sincronizar o Repo no workspace e rodar o pipeline para o backfill Nov/2025→atual.
 
 ## 📊 Inventário de Tabelas
 
@@ -72,7 +72,7 @@ O pipeline no workspace (`pipeline_openmeteo`, id `68827b61-cedc-4f21-b1f2-1f2f2
 | bronze | `clima_dia_dia`, `clima_hora_hora` | ✅ ativas, atualizadas a cada chegada de arquivo |
 | silver | `clima_dia_dia`, `clima_hora_hora` | ✅ ativas, com expectations de qualidade |
 | gold | `temp_max_dias_top10`, `temp_mins_dias_top10`, `temp_max_muns_top10`, `temp_mins_muns_top10`, `media_temp_chuva_muns` | ✅ ativas, usadas pelo dashboard |
-| gold | `clima_dia_historico`, `clima_extremo`, `clima_tendencia`, `clima_hora_analitico` | ⚠️ **órfãs**, congeladas desde 2025-12-04, decisão pendente |
+| gold | `clima_dia_historico`, `clima_extremo`, `clima_tendencia`, `clima_hora_analitico` | ✅ reintegradas ao pipeline em 2026-06-25 (glob), usadas pelo dashboard |
 
 ## ⚙️ Deploy e Sincronização (sem IaC)
 
