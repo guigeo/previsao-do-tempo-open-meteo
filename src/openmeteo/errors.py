@@ -17,3 +17,7 @@ class RateLimitError(OpenMeteoError):
 
 class PayloadError(OpenMeteoError):
     """Resposta 200 com erro estruturado ou payload vazio/inesperado."""
+
+
+class StorageError(Exception):
+    """Erro de gravação/upload na camada de storage."""
